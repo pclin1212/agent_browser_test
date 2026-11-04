@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>邮箱主页 - agent-browser 测试</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CM</div>
+      <div>
+        <h1>CoreMail 模拟邮箱</h1>
+        <span>邮箱主页 / 登录后导航</span>
+      </div>
+    </div>
+    <nav class="page-links" aria-label="页面互跳入口">
+      <a href="../index.html">6.25 综合测试页</a>
+      <a href="./index.html">登录页</a>
+      <a href="./inbox.html">收件箱</a>
+      <a href="./detail.html">今日邮件详情</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card panel">
+      <div class="eyebrow">步骤 6-7</div>
+      <h2>邮箱主页</h2>
+      <p class="lead">登录后执行 snapshot -i，此页面的核心入口是“收件箱”。</p>
+      <div class="actions">
+        <a id="inbox-entry" class="button" href="./inbox.html">收件箱</a>
+        <a class="button secondary" href="./detail.html">查看今日邮件详情</a>
+        <a class="button secondary" href="./index.html">返回登录页</a>
+        <a class="button secondary" href="../index.html">返回 6.25 综合测试页</a>
+      </div>
+    </section>
+
+    <section class="card panel" style="margin-top: 18px;">
+      <h3>测试说明</h3>
+      <p class="hint">
+        该页用于模拟登录后的邮箱首页或门户首页。Agent 点击“收件箱”后进入邮件列表页，再等待 networkidle。
+      </p>
+    </section>
+  </main>
+</body>
+</html>

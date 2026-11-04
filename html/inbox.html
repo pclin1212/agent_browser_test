@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>收件箱 - agent-browser 测试</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CM</div>
+      <div>
+        <h1>CoreMail 模拟邮箱</h1>
+        <span>收件箱 / 时间筛选</span>
+      </div>
+    </div>
+    <nav class="page-links" aria-label="页面互跳入口">
+      <a href="../index.html">6.25 综合测试页</a>
+      <a href="./index.html">登录页</a>
+      <a href="./home.html">邮箱主页</a>
+      <a href="./detail.html">今日邮件详情</a>
+    </nav>
+  </header>
+
+  <main class="container mail-shell">
+    <aside class="card panel nav-card" aria-label="邮箱导航">
+      <h3>邮箱导航</h3>
+      <a class="button" href="./inbox.html">收件箱</a>
+      <button class="secondary" type="button">已发送</button>
+      <button class="secondary" type="button">草稿箱</button>
+      <a class="button secondary" href="./home.html">返回邮箱主页</a>
+      <a class="button secondary" href="../index.html">返回 6.25 综合测试页</a>
+    </aside>
+
+    <section class="card panel" aria-label="邮件列表与筛选">
+      <div class="eyebrow">步骤 9-13</div>
+      <h2 style="font-size: 34px;">邮件列表</h2>
+
+      <div id="filtered-result" class="mail-list hidden" aria-label="筛选后的邮件标题列表">
+        <a class="mail-item unread" href="./detail.html">
+          <span class="tag green">今天</span>
+          <span class="meta">内网自动化测试组</span>
+          <strong>今日 agent-browser 邮件读取闭环验证</strong>
+          <span class="hint">点击进入正文页，执行 wait --load networkidle 后 get text --json。</span>
+        </a>
+      </div>
+
+      <div id="filter-panel">
+        <div class="toolbar">
+          <select id="date-filter" aria-label="时间筛选">
+            <option value="all">全部时间</option>
+            <option value="today">今天</option>
+            <option value="week">本周</option>
+          </select>
+          <button id="search-button" type="button">搜索/筛选</button>
+        </div>
+
+        <div id="all-mails" class="mail-list" aria-label="全部邮件标题列表">
+          <a class="mail-item unread" href="./detail.html">
+            <span class="tag green">今天</span>
+            <span class="meta">内网自动化测试组</span>
+            <strong>今日 agent-browser 邮件读取闭环验证</strong>
+            <span class="hint">今日唯一待读取邮件。</span>
+          </a>
+          <a class="mail-item" href="./detail.html?mail=yesterday">
+            <span class="tag">昨天</span>
+            <span class="meta">系统公告</span>
+            <strong>昨日门户巡检报告</strong>
+            <span class="hint">非今日邮件，用于验证筛选前后列表变化。</span>
+          </a>
+          <a class="mail-item" href="./detail.html?mail=training">
+            <span class="tag">本周</span>
+            <span class="meta">培训平台</span>
+            <strong>本周课程更新提醒</strong>
+            <span class="hint">普通历史邮件。</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>今日邮件详情 - agent-browser 测试</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CM</div>
+      <div>
+        <h1>CoreMail 模拟邮箱</h1>
+        <span>邮件正文 / 内容提取</span>
+      </div>
+    </div>
+    <nav class="page-links" aria-label="页面互跳入口">
+      <a href="../index.html">6.25 综合测试页</a>
+      <a href="./index.html">登录页</a>
+      <a href="./home.html">邮箱主页</a>
+      <a href="./inbox.html">收件箱</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <article class="card panel" aria-label="邮件正文">
+      <div class="actions">
+        <a class="button secondary" href="./inbox.html">返回邮件列表</a>
+        <a class="button secondary" href="./home.html">返回邮箱主页</a>
+        <a class="button secondary" href="../index.html">返回 6.25 综合测试页</a>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <span class="tag green">今天</span>
+        <span class="meta">发件人：内网自动化测试组</span>
+      </div>
+
+      <h2 style="font-size: 34px;">今日 agent-browser 邮件读取闭环验证</h2>
+      <div class="detail-body">
+        <p>各位同事：</p>
+        <p>这是一封用于内网部署测试的今日邮件，目标是验证 agent-browser 是否能够在邮箱场景中完成登录、进入收件箱、按“今天”筛选、打开唯一邮件、读取正文并总结。</p>
+        <p>本次测试要求：使用账号 2021001234 和密码 Jack@2024 登录；进入收件箱后选择时间筛选“今天”；点击“搜索/筛选”按钮后，列表中应只保留 1 封今日邮件；打开邮件详情后执行 get text --json 提取正文。</p>
+        <p>验收标准：Agent 能在 3 分钟内闭环，最终总结出今日邮件内容、测试步骤、唯一邮件数量和关闭页面后的 session list 检查结果。</p>
+        <p>备注：该测试页不包含验证码、滑块、人机校验、跨域 iframe 或弹窗干扰，主要用于观察模型在弱推理与强推理配置下的页面感知、ref 选择和等待策略差异。</p>
+      </div>
+
+      <section class="summary-box" aria-label="邮件摘要">
+        <h3>建议总结</h3>
+        <p>
+          今日邮件要求完成 agent-browser 邮箱闭环测试：登录邮箱、进入收件箱、筛选今天邮件、读取唯一今日邮件正文并总结。
+          验收目标是 3 分钟内完成闭环，并在关闭页面后通过 session list 检查会话已关闭。
+        </p>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

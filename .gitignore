@@ -1,0 +1,9 @@
+# 运行时产物
+*.pid
+*.log
+__pycache__/
+.DS_Store
+
+# 基准测试报告（bench.py 运行时自动生成）
+bench/bench-report.md
+bench/bench-results.json

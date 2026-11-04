@@ -1,0 +1,185 @@
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser install
+Installing Chrome...
+  Downloading Chrome 150.0.7871.24 for win64
+  https://storage.googleapis.com/chrome-for-testing-public/150.0.7871.24/win64/chrome-win64.zip
+  Retrying download (attempt 2/3)
+  Retrying download (attempt 3/3)
+  186/186 MB (100%)
+✓ Chrome 150.0.7871.24 installed successfully
+  Location: C:\Users\97547\.agent-browser\browsers\chrome-150.0.7871.24
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser open "file:///C:/Users/97547/Desktop/ab/mail-demo/index.html" && agent-browser wait --load networkidle
+[agent-browser] launched browser
+✓ CoreMail 模拟登录 - agent-browser 测试
+  file:///C:/Users/97547/Desktop/ab/mail-demo/index.html
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 内网邮箱模拟登录" [level=2, ref=e2]
+- link "返回 6.25 综合测试页" [ref=e3]
+- region "邮箱登录表单" [ref=e1]
+  - heading "邮箱登录" [level=3, ref=e4]
+  - textbox "账号" [ref=e5]
+  - textbox "密码" [ref=e6]
+  - button "登录" [ref=e7]
+  - button "填入演示账号" [ref=e8]
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 内网邮箱模拟登录" [level=2, ref=e2]
+- link "返回 6.25 综合测试页" [ref=e3]
+- region "邮箱登录表单" [ref=e1]
+  - heading "邮箱登录" [level=3, ref=e4]
+  - textbox "账号" [ref=e5]
+  - textbox "密码" [ref=e6]
+  - button "登录" [ref=e7]
+  - button "填入演示账号" [ref=e8]
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser fill @e5 "2021001234"
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser fill @e6 "Jack@2024"
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$
+agent-browser click @e7 && agent-browser wait --load networkidle
+✓ Done
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 模拟邮箱" [level=1, ref=e1]
+- navigation "页面互跳入口" [ref=e2]
+  - link "6.25 综合测试页" [ref=e3]
+  - link "登录页" [ref=e4]
+  - link "收件箱" [ref=e5]
+  - link "今日邮件详情" [ref=e6]
+- heading "邮箱主页" [level=2, ref=e7]
+- link "收件箱" [ref=e8]
+- link "查看今日邮件详情" [ref=e9]
+- link "返回登录页" [ref=e10]
+- link "返回 6.25 综合测试页" [ref=e11]
+- heading "测试说明" [level=3, ref=e12]
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser click @e8 && agent-browser wait --load networkidle
+✓ Done
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 模拟邮箱" [level=1, ref=e1]
+- navigation "页面互跳入口" [ref=e2]
+  - link "6.25 综合测试页" [ref=e4]
+  - link "登录页" [ref=e5]
+  - link "邮箱主页" [ref=e6]
+  - link "今日邮件详情" [ref=e7]
+- heading "邮箱导航" [level=3, ref=e8]
+- link "收件箱" [ref=e9]
+- button "已发送" [ref=e10]
+- button "草稿箱" [ref=e11]
+- link "返回邮箱主页" [ref=e12]
+- link "返回 6.25 综合测试页" [ref=e13]
+- region "邮件列表与筛选" [ref=e3]
+  - heading "邮件列表" [level=2, ref=e14]
+  - combobox "时间筛选" [expanded=false, ref=e15]: 全部时间
+    - option "全部时间" [selected, ref=e20]
+    - option "今天" [ref=e21]
+    - option "本周" [ref=e22]
+  - button "搜索/筛选" [ref=e16]
+  - link "今天 内网自动化测试组 今日 agent-browser 邮件读取闭环验证 未读 今日唯 一待读取邮件。" [ref=e17]
+  - link "昨天 系统公告 昨日门户巡检报告 非今日邮件，用于验证筛选前后列表变化。" [ref=e18]
+  - link "本周 培训平台 本周课程更新提醒 普通历史邮件。" [ref=e19]
+
+97547@MSI MINGW64 ~/Desktop
+$
+agent-browser select @e15 "今天"
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser click @e16 && agent-browser wait --load networkidle
+✓ Done
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 模拟邮箱" [level=1, ref=e1]
+- navigation "页面互跳入口" [ref=e2]
+  - link "6.25 综合测试页" [ref=e4]
+  - link "登录页" [ref=e5]
+  - link "邮箱主页" [ref=e6]
+  - link "今日邮件详情" [ref=e7]
+- heading "邮箱导航" [level=3, ref=e8]
+- link "收件箱" [ref=e9]
+- button "已发送" [ref=e10]
+- button "草稿箱" [ref=e11]
+- link "返回邮箱主页" [ref=e12]
+- link "返回 6.25 综合测试页" [ref=e13]
+- region "邮件列表与筛选" [ref=e3]
+  - heading "邮件列表" [level=2, ref=e14]
+  - link "今天 内网自动化测试组 今日 agent-browser 邮件读取闭环验证 未读 点击进 入正文页，执行 wait --load networkidle 后 get text --json。" [ref=e15]
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser click @e15 && agent-browser wait --load networkidle
+✓ Done
+✓ Done
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser get text --json
+{"error":"Missing arguments for: get text\nUsage: agent-browser get text <selector>","success":false,"type":"missing_arguments"}
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser snapshot -i
+- heading "CoreMail 模拟邮箱" [level=1, ref=e1]
+- navigation "页面互跳入口" [ref=e2]
+  - link "6.25 综合测试页" [ref=e4]
+  - link "登录页" [ref=e5]
+  - link "邮箱主页" [ref=e6]
+  - link "收件箱" [ref=e7]
+- article "邮件正文" [ref=e3]
+  - link "返回邮件列表" [ref=e8]
+  - link "返回邮箱主页" [ref=e9]
+  - link "返回 6.25 综合测试页" [ref=e10]
+  - heading "今日 agent-browser 邮件读取闭环验证" [level=2, ref=e11]
+  - region "邮件摘要" [ref=e12]
+    - heading "建议总结" [level=3, ref=e13]
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser get text @e3
+返回邮件列表
+返回邮箱主页
+返回 6.25 综合测试页
+今天 发件人：内网自动化测试组
+今日 agent-browser 邮件读取闭环验证
+
+各位同事：
+
+这是一封用于内网部署测试的今日邮件，目标是验证 agent-browser 是否能够在邮箱场景 中完成登录、进入收件箱、按“今天”筛选、打开唯一邮件、读取正文并总结。
+
+本次测试要求：使用账号 2021001234 和密码 Jack@2024 登录；进入收件箱后选择时间筛 选“今天”；点击“搜索/筛选”按钮后，列表中应只保留 1 封今日邮件；打开邮件详情后执行 get text --json 提取正文。
+
+验收标准：Agent 能在 3 分钟内闭环，最终总结出今日邮件内容、测试步骤、唯一邮件数 量和关闭页面后的 session list 检查结果。
+
+备注：该测试页不包含验证码、滑块、人机校验、跨域 iframe 或弹窗干扰，主要用于观察模型在弱推理与强推理配置下的页面感知、ref 选择和等待策略差异。
+
+建议总结
+
+今日邮件要求完成 agent-browser 邮箱闭环测试：登录邮箱、进入收件箱、筛选今天邮件 、读取唯一今日邮件正文并总结。 验收目标是 3 分钟内完成闭环，并在关闭页面后通过 session list 检查会话已关闭。
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser close
+✓ Browser closed
+
+97547@MSI MINGW64 ~/Desktop
+$ agent-browser session list
+No active sessions
+
+97547@MSI MINGW64 ~/Desktop
+$

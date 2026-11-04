@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CoreMail 模拟登录 - agent-browser 测试</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="container hero">
+    <section>
+      <div class="eyebrow">Agent-browser 邮箱闭环测试</div>
+      <h2>CoreMail 内网邮箱模拟登录</h2>
+      <p class="lead">
+        本页面用于验证“登录邮箱 → 筛选今天邮件（1篇） → 读取正文 → 总结 → close → session list”的完整链路。
+        页面无验证码、无二次认证、无 AI 拦截机制，接受任意非空账号密码。
+      </p>
+      <p class="hint">
+        推荐入口映射：将内网测试域名或反向代理的 <strong>https://mail.cn</strong> 指向本目录的 <strong>index.html</strong>。
+      </p>
+      <a class="button secondary" href="../index.html">返回 6.25 综合测试页</a>
+    </section>
+
+    <section class="card panel" aria-label="邮箱登录表单">
+      <h3>邮箱登录</h3>
+      <form id="login-form">
+        <div class="field">
+          <label for="username">账号</label>
+          <input id="username" name="username" autocomplete="username" placeholder="2021001234" />
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Jack@2024" />
+        </div>
+        <div class="actions">
+          <button id="login-button" type="submit">登录</button>
+          <button class="secondary" type="button" id="demo-button">填入演示账号</button>
+        </div>
+        <div id="login-status" class="status">登录成功，正在进入邮箱主页...</div>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
