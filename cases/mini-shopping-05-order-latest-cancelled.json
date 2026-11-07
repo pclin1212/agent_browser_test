@@ -1,0 +1,25 @@
+{
+  "name": "mini-shopping-05-order-latest-cancelled",
+  "env": "mini-shopping",
+  "category": "order",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/customer/account/login/",
+  "steps": [
+    ["open", "{BASE}/customer/account/login/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#email", "emma.lopez@gmail.com"],
+    ["fill", "#pass", "Password.123"],
+    ["click", "#send2"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/sales/order/history/"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "最近取消订单金额 365.42",
+      "cmd": ["get", "text", "body"],
+      "op": "contains",
+      "expect": "365.42"
+    }
+  ]
+}

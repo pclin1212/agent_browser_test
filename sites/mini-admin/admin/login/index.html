@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign in - magento admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Admin / <strong>Sign in</strong></nav>
+  <div class="form">
+    <h1>Welcome, let's get to work</h1>
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password">
+      <button class="btn-primary" id="login-btn" type="submit">Sign in</button>
+      <div class="err" id="login-err"></div>
+    </form>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  MA.renderHeader();
+  MA.initLogin();
+</script>
+</body>
+</html>

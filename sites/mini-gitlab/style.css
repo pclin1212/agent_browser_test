@@ -1,0 +1,113 @@
+/* mini-gitlab —— GitLab 风格的简洁界面 */
+* { box-sizing: border-box; }
+body {
+  font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  margin: 0; background: #fbfafd; color: #2b2b36; line-height: 1.6;
+}
+header.site {
+  background: #380d75; color: #fff; padding: 12px 28px;
+  display: flex; align-items: center; gap: 24px;
+}
+header.site a { color: #fff; text-decoration: none; font-size: 14px; }
+header.site a:hover { text-decoration: underline; }
+header.site .logo { font-weight: 700; font-size: 17px; }
+header.site .site-nav a { margin-right: 16px; }
+header.site .header-right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+header.site .header-user { font-size: 14px; color: #d5c8f5; }
+main { max-width: 1020px; margin: 26px auto; padding: 0 20px; }
+h1 { font-size: 22px; }
+h2 { font-size: 17px; margin-top: 26px; }
+a { color: #1068bf; }
+nav.breadcrumb { font-size: 13px; color: #666; margin-bottom: 14px; }
+nav.breadcrumb strong { color: #2b2b36; }
+
+/* 首页 README + 文件清单 */
+.panel { background: #fff; border: 1px solid #e5e3ec; border-radius: 6px; padding: 20px 24px; margin-bottom: 22px; }
+.readme-content { background: #fff; border: 1px solid #e5e3ec; border-radius: 6px; padding: 18px 22px; white-space: pre-wrap; font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 13px; overflow-x: auto; }
+#root-files { list-style: none; padding: 0; margin: 0; }
+#root-files .tree-item { padding: 6px 0; border-bottom: 1px solid #f2f0f7; font-size: 14px; }
+
+/* [陷阱G1] 文件树 */
+.tree { background: #fff; border: 1px solid #e5e3ec; border-radius: 6px; padding: 12px 16px; }
+.tree-item { padding-top: 7px; padding-bottom: 7px; padding-right: 8px; font-size: 14px; cursor: default; border-top: 1px solid #f5f3fa; }
+.tree-item:first-child { border-top: none; }
+.tree-dir { font-weight: 600; cursor: pointer; }
+.tree-dir:hover { background: #f4f1fb; }
+.tree-caret { display: inline-block; width: 14px; color: #666; font-size: 12px; }
+.tree-children { display: block; }
+.tree-hint { color: #666; font-size: 13px; margin-bottom: 10px; }
+
+/* [陷阱G2] 代码页 */
+.blob-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+.blob-meta { color: #666; font-size: 13px; }
+.file-content {
+  background: #fff; border: 1px solid #e5e3ec; border-radius: 6px;
+  padding: 16px 20px; overflow-x: auto;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px; line-height: 1.5; white-space: pre;
+}
+
+/* issue 列表 */
+.issues-head { display: flex; align-items: center; gap: 16px; }
+.issues-head h1 { margin: 0; }
+.btn {
+  display: inline-block; background: #1f75cb; color: #fff !important; text-decoration: none;
+  padding: 8px 16px; border-radius: 4px; font-size: 14px;
+}
+.issues-filters { display: flex; align-items: center; gap: 12px; margin: 16px 0; font-size: 14px; }
+.issues-filters label { color: #666; }
+select.state-filter { padding: 6px 10px; border: 1px solid #c8c5d6; border-radius: 4px; font-size: 14px; background: #fff; }
+#label-filters { margin-left: 10px; }
+.label-filter { margin-right: 8px; text-decoration: none; color: #1068bf; }
+.label-filter.active { color: #2b2b36; font-weight: 700; text-decoration: none; }
+table.issues-table { border-collapse: collapse; width: 100%; background: #fff; }
+table.issues-table th, table.issues-table td {
+  border: 1px solid #e5e3ec; padding: 10px 12px; font-size: 14px; text-align: left;
+}
+table.issues-table th { background: #f5f3fa; }
+table.issues-table td.empty { color: #666; text-align: center; }
+.issue-row td.issue-title a { color: #2b2b36; text-decoration: none; font-weight: 600; }
+.issue-row td.issue-title a:hover { color: #1068bf; }
+
+/* 标签与状态徽章 */
+.label { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; color: #fff; margin-right: 6px; }
+.label-bug { background: #d9534f; }
+.label-feature { background: #1f75cb; }
+.label-documentation { background: #8b6914; }
+.label-none { background: #9193ab; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; color: #fff; }
+.badge-open { background: #168f48; }
+.badge-closed { background: #8a8aa3; }
+
+/* issue 详情 */
+.issue-head h1 { margin-bottom: 6px; }
+.issue-meta { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #666; flex-wrap: wrap; }
+.issue-labels { margin: 14px 0; }
+.issue-description { background: #fff; border: 1px solid #e5e3ec; border-radius: 6px; padding: 16px 20px; white-space: pre-wrap; }
+.issue-back { display: inline-block; margin-top: 16px; font-size: 14px; }
+
+/* 表单（登录 / 新建 issue） */
+.form { background: #fff; border: 1px solid #e5e3ec; border-radius: 6px; padding: 26px; max-width: 460px; }
+.form label { display: block; font-size: 14px; margin: 14px 0 4px; }
+.form input, .form textarea {
+  width: 100%; padding: 10px; border: 1px solid #c8c5d6; border-radius: 4px; font-size: 15px;
+}
+.form .submit, .form .btn-submit {
+  width: auto; background: #1f75cb; color: #fff; border: none;
+  padding: 11px 22px; font-size: 15px; border-radius: 4px; cursor: pointer; margin-top: 20px;
+}
+.form .err { color: #c0392b; font-size: 14px; margin-top: 12px; min-height: 18px; }
+
+/* [陷阱G3] 自定义 div 下拉 */
+.dropdown { position: relative; margin-top: 4px; }
+.dropdown-toggle {
+  width: 100%; text-align: left; padding: 10px; border: 1px solid #c8c5d6; border-radius: 4px;
+  font-size: 15px; background: #fff; cursor: pointer;
+}
+.dropdown-menu {
+  position: absolute; top: 100%; left: 0; z-index: 10; width: 100%;
+  background: #fff; border: 1px solid #c8c5d6; border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(56, 13, 117, 0.18); margin-top: 4px;
+}
+.dropdown-option { padding: 10px 12px; font-size: 14px; cursor: pointer; }
+.dropdown-option:hover { background: #f4f1fb; }

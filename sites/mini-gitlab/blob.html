@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>File view - telemetry-dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">root / telemetry-dashboard / blob / <span id="blob-path"></span></nav>
+  <div class="blob-head">
+    <h1 id="blob-title">File view</h1>
+    <span class="blob-meta" id="blob-meta"></span>
+  </div>
+  <pre class="file-content" id="blob-content"></pre>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  MG.renderHeader();
+  MG.renderBlob();
+</script>
+</body>
+</html>

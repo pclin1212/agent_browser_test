@@ -1,0 +1,24 @@
+{
+  "name": "mini-gitlab-04-issues-opened-default",
+  "env": "mini-gitlab",
+  "category": "issues",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/issues/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "issue 列表默认 opened 状态：6 条 opened 全部可见，closed 4 条不可见",
+  "asserts": [
+    {
+      "desc": "opened issue 标题存在",
+      "cmd": ["get", "text", "#issues-table"],
+      "op": "contains_all",
+      "expect": [
+        "Login page crashes on Safari 15",
+        "Add dark mode theme support",
+        "Memory leak in the WebSocket connection handler"
+      ]
+    }
+  ]
+}

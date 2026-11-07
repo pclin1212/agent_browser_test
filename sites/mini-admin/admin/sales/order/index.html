@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Orders / Sales - magento admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Dashboard / Sales / <strong>Orders</strong></nav>
+  <h1>Orders</h1>
+
+  <div class="filters" id="filter-form">
+    <fieldset class="f-statuses">
+      <legend>Status</legend>
+      <label><input type="checkbox" class="f-status" id="f-pending" value="pending"> Pending</label>
+      <label><input type="checkbox" class="f-status" id="f-processing" value="processing"> Processing</label>
+      <label><input type="checkbox" class="f-status" id="f-complete" value="complete"> Complete</label>
+      <label><input type="checkbox" class="f-status" id="f-closed" value="closed"> Closed</label>
+    </fieldset>
+    <label for="filter-customer">Customer</label>
+    <input id="filter-customer" type="text" placeholder="Name contains&hellip;">
+    <label for="filter-from">From Date</label>
+    <input id="filter-from" type="text" placeholder="YYYY-MM-DD">
+    <label for="filter-to">To Date</label>
+    <input id="filter-to" type="text" placeholder="YYYY-MM-DD">
+    <button id="filter-btn" class="btn" type="button">Apply Filters</button>
+  </div>
+
+  <div class="mass-actions">
+    <label for="mass-action">Actions</label>
+    <select id="mass-action">
+      <option value="">Select action&hellip;</option>
+      <option value="hold">Hold</option>
+      <option value="delete">Delete</option>
+    </select>
+    <button id="apply-btn" class="btn-primary" type="button">Apply</button>
+    <span class="notice" id="orders-notice"></span>
+  </div>
+
+  <table class="grid" id="orders-table"></table>
+  <div id="pagination" class="pagination"></div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MA.requireAuth()) {
+    MA.renderHeader();
+    MA.initOrdersPage();
+  }
+</script>
+</body>
+</html>

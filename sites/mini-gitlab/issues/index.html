@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Issues - telemetry-dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">root / telemetry-dashboard / <strong>issues</strong></nav>
+  <div class="issues-head">
+    <h1>Issues</h1>
+    <a class="btn" href="/issues/new/">New issue</a>
+  </div>
+  <div class="issues-filters">
+    <label for="state-filter">State</label>
+    <select id="state-filter" class="state-filter">
+      <option value="opened" selected>opened</option>
+      <option value="closed">closed</option>
+      <option value="all">all</option>
+    </select>
+    <span id="label-filters"></span>
+  </div>
+  <table id="issues-table" class="issues-table"></table>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  MG.renderHeader();
+  MG.initIssueList();
+</script>
+</body>
+</html>

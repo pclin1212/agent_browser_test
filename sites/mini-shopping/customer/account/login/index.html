@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Customer Login - One Stop Market</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <a href="../../../../customer/account/login/">Sign In</a>
+  <a href="../../../../checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="../../../../">Home</a> / Customer Login</nav>
+  <div class="form">
+    <h1>Login</h1>
+    <form id="login-form" onsubmit="return false">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username">
+      <label for="pass">Password</label>
+      <input id="pass" type="password" autocomplete="current-password">
+      <button class="submit" id="send2" type="button">Login</button>
+      <div class="err" id="login-err"></div>
+    </form>
+  </div>
+</main>
+<script src="../../../data.js"></script>
+<script src="../../../app.js"></script>
+<script>
+  var err = document.getElementById("login-err");
+  document.getElementById("send2").addEventListener("click", function () {
+    var u = MS.login(document.getElementById("email").value.trim(),
+                     document.getElementById("pass").value);
+    if (u) { window.location.href = "../"; }
+    else { err.textContent = "The account sign-in was incorrect or your account is disabled temporarily. Please wait and try again later."; }
+  });
+</script>
+</body>
+</html>

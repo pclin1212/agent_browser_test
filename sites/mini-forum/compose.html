@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New Topic - nodeforum</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Topics / <strong>New Topic</strong></nav>
+  <h1>New Topic</h1>
+  <div class="compose" id="compose-form">
+    <label for="post-title">Title</label>
+    <input id="post-title" type="text" placeholder="Enter a descriptive title">
+    <label for="editor">Content</label>
+    <div id="editor" class="editor" contenteditable="true" aria-label="topic content"></div>
+    <label>Tags</label>
+    <div class="tag-picker">
+      <button id="tag-dropdown-toggle" class="btn" type="button">Select tags&#9662;</button>
+      <span id="selected-tags" class="selected-tags"></span>
+      <div id="tag-dropdown" class="tag-dropdown"></div>
+    </div>
+    <button class="btn-primary" id="submit-btn" type="button">Submit</button>
+    <div class="err" id="compose-err"></div>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MF.requireAuth()) {
+    MF.renderHeader();
+    MF.initCompose();
+  }
+</script>
+</body>
+</html>

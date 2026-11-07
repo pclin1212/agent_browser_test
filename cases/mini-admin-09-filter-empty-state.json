@@ -1,0 +1,34 @@
+{
+  "name": "mini-admin-09-filter-empty-state",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#filter-customer", "NoSuchCustomer"],
+    ["click", "#filter-btn"]
+  ],
+  "steps_note": "筛选无结果空态：客户名不命中任何冻结数据 → 表格渲染空态文案（Magryan 风格 'We couldn't find any records.'）",
+  "asserts": [
+    {
+      "desc": "空态文案出现",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains",
+      "expect": "We couldn't find any records."
+    },
+    {
+      "desc": "任何订单行都不存在",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "re",
+      "expect": "(?s)^(?!.*100000001)"
+    }
+  ]
+}

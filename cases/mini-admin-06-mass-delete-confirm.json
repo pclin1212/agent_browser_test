@@ -1,0 +1,43 @@
+{
+  "name": "mini-admin-06-mass-delete-confirm",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#mass-action", "delete"],
+    ["click", "#cb-100000002"],
+    ["click", "#apply-btn"],
+    ["get", "text", "#confirm-modal"],
+    ["click", "#confirm-yes"]
+  ],
+  "steps_note": "陷阱A2：delete+勾选+Apply 后确认弹窗才懒插入 DOM（此前 get/click #confirm-modal 必失败）；必须 click #confirm-yes 才真删",
+  "asserts": [
+    {
+      "desc": "确认弹窗文案（步骤内 get 已验证懒插入）",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000001"]
+    },
+    {
+      "desc": "100000002 已被真删",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "re",
+      "expect": "(?s)^(?!.*100000002)"
+    },
+    {
+      "desc": "提示条输出删除结果",
+      "cmd": ["get", "text", "#orders-notice"],
+      "op": "contains",
+      "expect": "deleted"
+    }
+  ]
+}

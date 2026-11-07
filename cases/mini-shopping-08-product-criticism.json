@@ -1,0 +1,21 @@
+{
+  "name": "mini-shopping-08-product-criticism",
+  "env": "mini-shopping",
+  "category": "product",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/mineralogie-all-natural-lip-gloss-ruby-rose.html",
+  "steps": [
+    ["open", "{BASE}/mineralogie-all-natural-lip-gloss-ruby-rose.html"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#tab-label-reviews"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "商品批评关键词 Uneven color",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Uneven color"]
+    }
+  ]
+}

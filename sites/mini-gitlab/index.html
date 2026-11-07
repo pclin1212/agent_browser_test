@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>telemetry-dashboard - mini-gitlab</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">root / <strong>telemetry-dashboard</strong></nav>
+  <div class="panel">
+    <h1>telemetry-dashboard</h1>
+    <p>Self-hosted service metrics, uptime checks and weekly activity digests.</p>
+    <h2>README.md</h2>
+    <pre class="readme-content" id="readme-content"></pre>
+  </div>
+  <div class="panel">
+    <h2>Project files</h2>
+    <p><a href="/tree.html">Browse the full repository tree</a></p>
+    <ul id="root-files"></ul>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  MG.renderHeader();
+  MG.initHome();
+</script>
+</body>
+</html>

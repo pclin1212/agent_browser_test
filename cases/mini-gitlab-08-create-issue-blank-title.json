@@ -1,0 +1,33 @@
+{
+  "name": "mini-gitlab-08-create-issue-blank-title",
+  "env": "mini-gitlab",
+  "category": "issues",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/issues/new/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#create-issue-btn"]
+  ],
+  "steps_note": "静默拦截：空标题提交 rc==0 但无导航发生，仅行内报错；断言仍停留在 new 页面且错误信息可见",
+  "asserts": [
+    {
+      "desc": "行内错误信息出现",
+      "cmd": ["get", "text", "#new-issue-err"],
+      "op": "equals",
+      "expect": "Title can't be blank."
+    },
+    {
+      "desc": "仍停留 new issue 表单页（未被导航带走）",
+      "cmd": ["get", "text", "body"],
+      "op": "contains",
+      "expect": "New issue"
+    }
+  ]
+}

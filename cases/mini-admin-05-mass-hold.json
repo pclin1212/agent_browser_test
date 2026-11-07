@@ -1,0 +1,35 @@
+{
+  "name": "mini-admin-05-mass-hold",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#mass-action", "hold"],
+    ["click", "#cb-100000001"],
+    ["click", "#apply-btn"]
+  ],
+  "steps_note": "批量 hold 全流程：原生 select（select 指令）→ 勾行 checkbox → Apply；hold 状态即时写入行内（无导航）",
+  "asserts": [
+    {
+      "desc": "行 100000001 状态变为 hold",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000001", "hold"]
+    },
+    {
+      "desc": "提示条输出批量结果",
+      "cmd": ["get", "text", "#orders-notice"],
+      "op": "contains",
+      "expect": "put on hold"
+    }
+  ]
+}

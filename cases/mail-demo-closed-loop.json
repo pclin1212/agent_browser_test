@@ -1,0 +1,35 @@
+{
+  "name": "mail-demo-closed-loop",
+  "env": "mail-demo",
+  "category": "navigation",
+  "start_url": "http://127.0.0.1:8000/index.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "2021001234"],
+    ["fill", "#password", "Jack@2024"],
+    ["click", "#login-button"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#inbox-entry"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#date-filter", "今天"],
+    ["click", "#search-button"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#filtered-result a.mail-item"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "终态停留在 detail.html",
+      "cmd": ["eval", "location.href"],
+      "op": "contains",
+      "expect": "detail.html"
+    },
+    {
+      "desc": "正文包含关键句（内网部署测试）",
+      "cmd": ["get", "text", "article[aria-label='邮件正文']"],
+      "op": "contains",
+      "expect": "内网部署测试"
+    }
+  ]
+}

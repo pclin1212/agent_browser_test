@@ -1,0 +1,29 @@
+{
+  "name": "mini-forum-03-search-form-get",
+  "env": "mini-forum",
+  "category": "topics",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/index.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#search-input", "Postgres"],
+    ["click", "#search-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "普通 form GET 搜索（正常对照组，对照 F1/F2 的非标准交互）：submit 触发真实导航，服务端忽略 query 由 JS 过滤",
+  "asserts": [
+    {
+      "desc": "搜索命中 Postgres 帖子",
+      "cmd": ["get", "text", "#topic-list"],
+      "op": "contains_all",
+      "expect": ["Postgres query slow after upgrading to 14"]
+    },
+    {
+      "desc": "未命中的帖子被过滤",
+      "cmd": ["get", "text", "#topic-list"],
+      "op": "re",
+      "expect": "(?s)^(?!.*Chrome hangs with more than 20 tabs)"
+    }
+  ]
+}

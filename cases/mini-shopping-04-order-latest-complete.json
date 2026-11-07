@@ -1,0 +1,25 @@
+{
+  "name": "mini-shopping-04-order-latest-complete",
+  "env": "mini-shopping",
+  "category": "order",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/customer/account/login/",
+  "steps": [
+    ["open", "{BASE}/customer/account/login/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#email", "emma.lopez@gmail.com"],
+    ["fill", "#pass", "Password.123"],
+    ["click", "#send2"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/sales/order/history/"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "最近完成订单金额 65.32",
+      "cmd": ["get", "text", "body"],
+      "op": "contains",
+      "expect": "65.32"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "mini-shopping-10-sony-names",
+  "env": "mini-shopping",
+  "category": "search",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/",
+  "steps": [
+    ["open", "{BASE}/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#search"],
+    ["press", "s"],
+    ["press", "o"],
+    ["press", "n"],
+    ["press", "y"],
+    ["press", "Enter"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "陷阱1：搜索框只认真实键事件，fill/type 会被静默拦截，必须逐字符 press（查询词缩短为 sony，断言不变）",
+  "asserts": [
+    {
+      "desc": "Sony 耳机全名（前 3 款）",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": [
+        "SONY WH1000XM3 Bluetooth Wireless Noise Canceling Headphones Silver WH-1000XM3/S (Renewed)",
+        "Sony WH-CH710N/H Wireless Bluetooth Noise Cancelling Headphones",
+        "Sony WH-1000XM3B Wireless Bluetooth Noise-Canceling Over-Ear Headphones (Black) Basic Headphone Bundle Kit with Stylus"
+      ]
+    }
+  ]
+}

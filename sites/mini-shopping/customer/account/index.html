@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Account - One Stop Market</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <a href="../../../customer/account/">My Account</a>
+  <a href="../../../checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="../../../">Home</a> / My Account</nav>
+  <div id="account-box"></div>
+</main>
+<script src="../../data.js"></script>
+<script src="../../app.js"></script>
+<script>
+  MS.requireAuth();
+  var u = MS.user();
+  document.getElementById("account-box").innerHTML =
+    "<h1>My Account</h1>" +
+    "<p>Hello, <strong>" + (u ? MS.esc(u.name) : "") + "</strong>!</p>" +
+    "<ul>" +
+    "<li><a href='../../../sales/order/history/'>My Orders</a></li>" +
+    "<li>Account Information</li>" +
+    "<li>Address Book</li>" +
+    "</ul>" +
+    "<button id='signout'>Sign Out</button>";
+  document.getElementById("signout").addEventListener("click", function () {
+    MS.logout();
+    window.location.href = "login/";
+  });
+</script>
+</body>
+</html>

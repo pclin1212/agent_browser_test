@@ -1,0 +1,30 @@
+{
+  "name": "mini-admin-01-login-dashboard",
+  "env": "mini-admin",
+  "category": "auth",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "登录成功跳转仪表盘；未登录访问受保护页会 302 到 /admin/login/（JS 层 requireAuth）",
+  "asserts": [
+    {
+      "desc": "仪表盘渲染：用户名 + 统计卡 + 最近订单",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Admin User", "Dashboard", "TOTAL ORDERS", "Recent Orders"]
+    },
+    {
+      "desc": "冻结数据集 60 单可静态推演",
+      "cmd": ["get", "text", "#stat-total"],
+      "op": "equals",
+      "expect": "60"
+    }
+  ]
+}

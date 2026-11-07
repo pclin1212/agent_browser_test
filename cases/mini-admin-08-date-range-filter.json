@@ -1,0 +1,35 @@
+{
+  "name": "mini-admin-08-date-range-filter",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#filter-from", "2022-10-15"],
+    ["fill", "#filter-to", "2022-10-16"],
+    ["click", "#filter-btn"]
+  ],
+  "steps_note": "日期范围筛选（多条件组合的第三维度）：date=2022-10-(i%28+1)，窗口 [15,16] → i%28∈{14,15} → i=14,15,42,43 → 4 单",
+  "asserts": [
+    {
+      "desc": "日期窗口内 4 单全部命中",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000015", "100000016", "100000043", "100000044"]
+    },
+    {
+      "desc": "窗口外订单被过滤",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "re",
+      "expect": "(?s)^(?!.*100000001)"
+    }
+  ]
+}

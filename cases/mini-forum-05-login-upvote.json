@@ -1,0 +1,27 @@
+{
+  "name": "mini-forum-05-login-upvote",
+  "env": "mini-forum",
+  "category": "interaction",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/login.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/topic/2/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#upvote-t2"]
+  ],
+  "steps_note": "登录后点赞：主帖基线票数 5（冻结），点赞后应为 6",
+  "asserts": [
+    {
+      "desc": "点赞生效：票数 5 -> 6",
+      "cmd": ["get", "text", "#votes-t2"],
+      "op": "equals",
+      "expect": "6"
+    }
+  ]
+}

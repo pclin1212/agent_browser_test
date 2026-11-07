@@ -1,0 +1,29 @@
+{
+  "name": "mini-shopping-01-login",
+  "env": "mini-shopping",
+  "category": "auth",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/customer/account/login/",
+  "steps": [
+    ["open", "{BASE}/customer/account/login/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#email", "emma.lopez@gmail.com"],
+    ["fill", "#pass", "Password.123"],
+    ["click", "#send2"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "登录后跳转到账户页",
+      "cmd": ["eval", "location.href"],
+      "op": "contains",
+      "expect": "customer/account"
+    },
+    {
+      "desc": "账户页含用户名",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Emma Lopez"]
+    }
+  ]
+}

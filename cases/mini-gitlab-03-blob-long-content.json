@@ -1,0 +1,30 @@
+{
+  "name": "mini-gitlab-03-blob-long-content",
+  "env": "mini-gitlab",
+  "category": "code",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/blob.html?file=src/utils/format.js",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "陷阱G2：139 行长文本单条 get text 必须完整带回，任何截断都会导致断言失败",
+  "asserts": [
+    {
+      "desc": "长代码首行/末行/中段函数签名均完整",
+      "cmd": ["get", "text", "#blob-content"],
+      "op": "contains_all",
+      "expect": [
+        "// src/utils/format.js - shared formatting helpers for telemetry-dashboard",
+        "function formatDuration(seconds)",
+        "// End of src/utils/format.js"
+      ]
+    },
+    {
+      "desc": "blob 页标题渲染文件名",
+      "cmd": ["get", "text", "#blob-title"],
+      "op": "equals",
+      "expect": "format.js"
+    }
+  ]
+}

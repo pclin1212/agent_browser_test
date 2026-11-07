@@ -1,0 +1,34 @@
+{
+  "name": "mini-admin-07-mass-silent-noaction",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#cb-100000001"],
+    ["click", "#apply-btn"]
+  ],
+  "steps_note": "陷阱A1：勾了行但未选动作时点 Apply，处理器内静默 return——rc==0 但无弹窗/提示/导航（指令成功≠功能成功）",
+  "asserts": [
+    {
+      "desc": "确认弹窗未出现（delete 未触发）",
+      "cmd": ["get", "text", "body"],
+      "op": "re",
+      "expect": "(?s)^(?!.*Are you sure)"
+    },
+    {
+      "desc": "表格原样：100000001 仍是 pending",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000001", "pending"]
+    }
+  ]
+}

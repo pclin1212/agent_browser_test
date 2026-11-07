@@ -1,0 +1,24 @@
+{
+  "name": "mini-forum-04-topic-nested-replies",
+  "env": "mini-forum",
+  "category": "topics",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/topic/6/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "帖子 #6 冻结 6 条回复（5 顶层 + 1 嵌套），嵌套结构为 ol>li>ol>li，验证 CLI 提取深层文本",
+  "asserts": [
+    {
+      "desc": "标题、回复计数、嵌套回复文本齐全",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": [
+        "Weekly news digest: browser engines and web standards",
+        "6 replies",
+        "Exactly - the srcset behavior finally matches the spec."
+      ]
+    }
+  ]
+}

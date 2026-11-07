@@ -1,0 +1,20 @@
+{
+  "name": "mini-gitlab-10-blob-notfound",
+  "env": "mini-gitlab",
+  "category": "code",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/blob.html",
+  "steps": [
+    ["open", "{start_url}?file=nonexistent/file.js"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "blob 404 空态：?file= 指向不存在的路径 → 页面渲染 File not found（负向路径，长内容渲染的对照面）",
+  "asserts": [
+    {
+      "desc": "404 文案与提示齐全",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["File not found", "File not found in this repository."]
+    }
+  ]
+}

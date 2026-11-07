@@ -1,0 +1,21 @@
+{
+  "name": "mini-forum-06-anonymous-upvote-silent",
+  "env": "mini-forum",
+  "category": "interaction",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/topic/2/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#upvote-t2"]
+  ],
+  "steps_note": "陷阱F2：未登录点赞在处理器内静默 return——rc==0、无报错、无导航，但票数必须不变（指令成功≠功能成功）",
+  "asserts": [
+    {
+      "desc": "票数保持基线 5 不变",
+      "cmd": ["get", "text", "#votes-t2"],
+      "op": "equals",
+      "expect": "5"
+    }
+  ]
+}

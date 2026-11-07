@@ -1,0 +1,30 @@
+{
+  "name": "mini-gitlab-06-issue-detail",
+  "env": "mini-gitlab",
+  "category": "issues",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/issues/view/?iid=6",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "issue 详情页：标题/编号/状态/长描述",
+  "asserts": [
+    {
+      "desc": "详情页标题与元信息",
+      "cmd": ["get", "text", "#issue-detail"],
+      "op": "contains_all",
+      "expect": [
+        "Memory leak in the WebSocket connection handler",
+        "Issue #6",
+        "Opened"
+      ]
+    },
+    {
+      "desc": "长描述正文完整",
+      "cmd": ["get", "text", "#issue-detail"],
+      "op": "contains",
+      "expect": "exceeds 1 GB RSS and stops responding until it is restarted"
+    }
+  ]
+}

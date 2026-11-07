@@ -1,0 +1,34 @@
+{
+  "name": "mini-admin-02-orders-pagination",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#pagination a.page-link[data-p='2']"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "订单列表分页是真实链接导航（?p=2），60 单每页 20 条共 3 页；第 2 页应为 100000021-100000040",
+  "asserts": [
+    {
+      "desc": "第 2 页首尾订单都在",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000021", "100000040"]
+    },
+    {
+      "desc": "第 2 页不含第 1 页订单",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "re",
+      "expect": "(?s)^(?!.*100000001)"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "mini-gitlab-02-tree-deep-expand",
+  "env": "mini-gitlab",
+  "category": "tree",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/tree.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["click", ".tree-item[data-path='src']"],
+    ["click", ".tree-item[data-path='src/utils']"]
+  ],
+  "steps_note": "陷阱G1：子目录点击才懒渲染，必须逐层展开 src/ → src/utils/ 才能读到深层文件",
+  "asserts": [
+    {
+      "desc": "深层文件 format.js / validators.js 与中间层 widgets 均已渲染",
+      "cmd": ["get", "text", "#tree-root"],
+      "op": "contains_all",
+      "expect": ["format.js", "validators.js", "widgets/"]
+    }
+  ]
+}

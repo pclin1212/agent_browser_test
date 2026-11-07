@@ -1,0 +1,31 @@
+{
+  "name": "mail-demo-demo-button",
+  "env": "mail-demo",
+  "category": "form",
+  "start_url": "http://127.0.0.1:8000/index.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#demo-button"]
+  ],
+  "asserts": [
+    {
+      "desc": "演示按钮自动填入账号",
+      "cmd": ["eval", "document.querySelector('#username').value"],
+      "op": "contains",
+      "expect": "2021001234"
+    },
+    {
+      "desc": "演示按钮自动填入密码",
+      "cmd": ["eval", "document.querySelector('#password').value"],
+      "op": "contains",
+      "expect": "Jack@2024"
+    },
+    {
+      "desc": "弹出 toast 提示",
+      "cmd": ["get", "text", "#toast"],
+      "op": "contains",
+      "expect": "已填入演示账号"
+    }
+  ]
+}

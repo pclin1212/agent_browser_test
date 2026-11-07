@@ -1,0 +1,29 @@
+{
+  "name": "mini-shopping-03-search-ugreen",
+  "env": "mini-shopping",
+  "category": "search",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/",
+  "steps": [
+    ["open", "{BASE}/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#search"],
+    ["press", "u"],
+    ["press", "g"],
+    ["press", "r"],
+    ["press", "e"],
+    ["press", "e"],
+    ["press", "n"],
+    ["press", "Enter"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "陷阱1：搜索框只认真实键事件，fill/type 会被静默拦截，必须逐字符 press",
+  "asserts": [
+    {
+      "desc": "ugreen 结果页标题与价格 6.99",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Search results for: 'ugreen'", "$6.99"]
+    }
+  ]
+}

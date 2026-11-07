@@ -1,0 +1,25 @@
+{
+  "name": "mini-gitlab-05-issues-filter-closed",
+  "env": "mini-gitlab",
+  "category": "issues",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/issues/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#state-filter", "closed"]
+  ],
+  "steps_note": "原生 select 筛选 closed：#3/#5/#7/#9 四条 closed 可见",
+  "asserts": [
+    {
+      "desc": "closed issue 标题存在且 open 类 issue 被过滤",
+      "cmd": ["get", "text", "#issues-table"],
+      "op": "contains_all",
+      "expect": [
+        "Dashboard chart tooltips overlap on small screens",
+        "Export weekly reports as CSV",
+        "Timezone offset applied twice in the weekly digest email"
+      ]
+    }
+  ]
+}

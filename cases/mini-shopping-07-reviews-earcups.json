@@ -1,0 +1,21 @@
+{
+  "name": "mini-shopping-07-reviews-earcups",
+  "env": "mini-shopping",
+  "category": "product",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html",
+  "steps": [
+    ["open", "{BASE}/6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#tab-label-reviews"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "提及耳罩偏小的评论者名单（懒渲染后可见）",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Joseph Brzezinski", "Catso", "Dibbins", "Anglebert Dinkherhump", "Michelle Davis"]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "mini-forum-08-compose-missing-tag",
+  "env": "mini-forum",
+  "category": "compose",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/login.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "bob"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/compose.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#post-title", "This post should never be created"],
+    ["fill", "#editor", "Body is filled in but the tag picker was never touched."],
+    ["click", "#submit-btn"]
+  ],
+  "steps_note": "发帖静默校验：标题/正文齐全但未选标签，提交在处理器内 return——rc==0、行内报错、不跳转（URL 不变）",
+  "asserts": [
+    {
+      "desc": "行内报错提示缺标签",
+      "cmd": ["get", "text", "#compose-err"],
+      "op": "contains",
+      "expect": "tag"
+    },
+    {
+      "desc": "页面未跳转（仍在发帖页）",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["New Topic"]
+    }
+  ]
+}

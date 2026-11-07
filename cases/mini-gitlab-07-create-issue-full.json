@@ -1,0 +1,37 @@
+{
+  "name": "mini-gitlab-07-create-issue-full",
+  "env": "mini-gitlab",
+  "category": "issues",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/issues/new/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#issue-title", "CSV export drops the last row of large reports"],
+    ["fill", "#issue-description", "Exporting a report with more than 1000 rows drops the final row from the CSV file."],
+    ["click", "#label-toggle"],
+    ["click", ".dropdown-option[data-value='bug']"],
+    ["click", "#create-issue-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "陷阱G3：label 是自定义 div 下拉，select 指令无效，必须 click #label-toggle 展开（选项懒渲染）后 click 选项；提交后跳转新 issue 详情",
+  "asserts": [
+    {
+      "desc": "新 issue #11 创建成功，标题/状态/bug 标签齐全",
+      "cmd": ["get", "text", "#issue-detail"],
+      "op": "contains_all",
+      "expect": [
+        "CSV export drops the last row of large reports",
+        "Issue #11",
+        "Opened",
+        "bug"
+      ]
+    }
+  ]
+}

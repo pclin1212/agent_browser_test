@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order view - magento admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Dashboard / Sales / Orders / <strong>View</strong></nav>
+  <div id="order-detail"></div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MA.requireAuth()) {
+    MA.renderHeader();
+    MA.renderOrderDetail();
+  }
+</script>
+</body>
+</html>

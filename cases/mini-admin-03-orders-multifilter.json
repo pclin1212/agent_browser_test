@@ -1,0 +1,35 @@
+{
+  "name": "mini-admin-03-orders-multifilter",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#f-complete"],
+    ["fill", "#filter-customer", "Ava Johnson"],
+    ["click", "#filter-btn"]
+  ],
+  "steps_note": "多条件筛选：状态 checkbox 组 + 客户名，必须点 Apply Filters 才生效（不自动提交）；complete+Ava Johnson 静态推演 = 100000007/27/47",
+  "asserts": [
+    {
+      "desc": "筛选结果恰为 3 单：100000007/100000027/100000047",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "contains_all",
+      "expect": ["100000007", "100000027", "100000047"]
+    },
+    {
+      "desc": "不含 pending 的 100000001",
+      "cmd": ["get", "text", "#orders-table"],
+      "op": "re",
+      "expect": "(?s)^(?!.*100000001)"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Search entire store here..." aria-label="Search">
+    <button title="Search">Go</button>
+  </div>
+  <a href="customer/account/login/">Sign In</a>
+  <a href="checkout/cart/">Cart</a>
+</header>
+<main id="results"></main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  MS.initSearchTrap("#search");
+  MS.renderSearch(document.getElementById("results"), 6);
+</script>
+</body>
+</html>

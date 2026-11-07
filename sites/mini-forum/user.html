@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Members - nodeforum</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Members</nav>
+  <h1>Members</h1>
+  <div class="user-search">
+    <input id="user-search" type="text" placeholder="Search by username or name&hellip;">
+    <button id="user-search-btn" class="btn" type="button">Search</button>
+  </div>
+  <ul id="user-results" class="user-list"></ul>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  MF.renderHeader();
+  MF.initUsers();
+</script>
+</body>
+</html>

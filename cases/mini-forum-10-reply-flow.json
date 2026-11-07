@@ -1,0 +1,34 @@
+{
+  "name": "mini-forum-10-reply-flow",
+  "env": "mini-forum",
+  "category": "interaction",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/login.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/topic/6/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#reply-content", "Thanks, the digest links were very useful this week."],
+    ["click", "#reply-submit"]
+  ],
+  "steps_note": "回复全流程：登录→textarea 填写→提交→localStorage 持久化→整页重渲染，回复计数 6→7",
+  "asserts": [
+    {
+      "desc": "回复计数递增到 7",
+      "cmd": ["get", "text", "#reply-count"],
+      "op": "equals",
+      "expect": "7"
+    },
+    {
+      "desc": "新回复内容与作者出现在页面",
+      "cmd": ["get", "text", "#replies"],
+      "op": "contains_all",
+      "expect": ["Thanks, the digest links were very useful this week.", "Alice Chen"]
+    }
+  ]
+}

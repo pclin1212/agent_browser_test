@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - magento admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Dashboard</nav>
+  <h1>Dashboard</h1>
+  <div id="stats-cards">
+    <div class="stat-card"><span class="stat-label">Total Orders</span><span class="stat-value" id="stat-total"></span></div>
+    <div class="stat-card"><span class="stat-label">Pending</span><span class="stat-value" id="stat-pending"></span></div>
+    <div class="stat-card"><span class="stat-label">Processing</span><span class="stat-value" id="stat-processing"></span></div>
+    <div class="stat-card"><span class="stat-label">Complete</span><span class="stat-value" id="stat-complete"></span></div>
+    <div class="stat-card"><span class="stat-label">Closed</span><span class="stat-value" id="stat-closed"></span></div>
+    <div class="stat-card"><span class="stat-label">Revenue</span><span class="stat-value" id="stat-revenue"></span></div>
+  </div>
+  <h2>Recent Orders</h2>
+  <table class="grid" id="recent-orders"></table>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MA.requireAuth()) {
+    MA.renderHeader();
+    MA.renderDashboard();
+  }
+</script>
+</body>
+</html>

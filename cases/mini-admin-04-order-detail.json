@@ -1,0 +1,26 @@
+{
+  "name": "mini-admin-04-order-detail",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/view/?id=100000007"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "订单详情页 ?id= 参数化渲染；100000007 由冻结数据生成规则静态推演（Ava Johnson / complete / 126.21 / 2022-10-07）",
+  "asserts": [
+    {
+      "desc": "详情字段与数据规则一致",
+      "cmd": ["get", "text", "#order-detail"],
+      "op": "contains_all",
+      "expect": ["100000007", "Ava Johnson", "126.21", "2022-10-07", "complete", "Sony MDR-ZX110 Headphones"]
+    }
+  ]
+}

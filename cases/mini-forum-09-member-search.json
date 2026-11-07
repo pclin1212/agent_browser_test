@@ -1,0 +1,28 @@
+{
+  "name": "mini-forum-09-member-search",
+  "env": "mini-forum",
+  "category": "members",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/user.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#user-search", "bob"],
+    ["click", "#user-search-btn"]
+  ],
+  "steps_note": "成员搜索：JS 过滤用户名/姓名，bob 命中 Bob Smith（冻结数据静态推演）",
+  "asserts": [
+    {
+      "desc": "命中 Bob Smith 且邮箱正确",
+      "cmd": ["get", "text", "#user-results"],
+      "op": "contains_all",
+      "expect": ["Bob Smith", "bob@example.com"]
+    },
+    {
+      "desc": "其他成员被过滤",
+      "cmd": ["get", "text", "#user-results"],
+      "op": "re",
+      "expect": "(?s)^(?!.*Carol)"
+    }
+  ]
+}

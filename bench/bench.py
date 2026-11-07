@@ -19,10 +19,12 @@ daemon 空闲 15s 后自动退出，Chrome 随之关闭，系统零残留。
 """
 
 import argparse
+import glob as _glob
 import json
 import math
 import os
 import platform
+import re
 import shutil
 import statistics
 import subprocess
@@ -35,6 +37,24 @@ from datetime import datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)  # 仓库根目录
 DEFAULT_PAGE = os.path.join(ROOT, "html", "index.html")
+
+
+def archive_with_timestamp(paths, out_dir):
+    """跑完自动按时间戳留档，避免下一轮运行覆盖上一轮报告/原始数据。
+
+    归档到 <out_dir>/archive/<原名>-<YYYYMMDD-HHMMSS>.<ext>，
+    固定名文件（cases-report.md 等）继续作为"最新一轮"被覆盖。
+    """
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    arch = os.path.join(out_dir, "archive")
+    os.makedirs(arch, exist_ok=True)
+    saved = []
+    for p in paths:
+        stem, ext = os.path.splitext(os.path.basename(p))
+        dst = os.path.join(arch, f"{stem}-{stamp}{ext}")
+        shutil.copyfile(p, dst)
+        saved.append(dst)
+    return saved
 
 STEPS = [
     ("open_login",    ["open", "{PAGE_URL}"]),
@@ -147,6 +167,319 @@ def fmt_stats(s):
             f"p95={s['p95']}  p99={s['p99']}  max={s['max']}  (单位 ms)")
 
 
+# ---------------- 用例合集模式（--cases） ----------------
+
+def load_cases(case_dir):
+    """加载 cases/*.json 用例合集"""
+    paths = sorted(_glob.glob(os.path.join(case_dir, "*.json")))
+    if not paths:
+        sys.exit(f"错误：{case_dir} 下没有找到 *.json 用例文件")
+    cases = []
+    for p in paths:
+        with open(p, encoding="utf-8") as f:
+            c = json.load(f)
+        c.setdefault("name", os.path.splitext(os.path.basename(p))[0])
+        for field in ("env", "start_url", "steps"):
+            if field not in c:
+                sys.exit(f"错误：用例 {p} 缺少字段 {field}")
+        cases.append(c)
+    return cases
+
+
+def eval_assert(base_cmd, env, a, cmd_timeout):
+    """执行单条功能断言，返回 (ok, got, err)"""
+    argv = base_cmd + list(a["cmd"])
+    try:
+        r = subprocess.run(argv, env=env, capture_output=True,
+                           text=True, timeout=cmd_timeout)
+    except subprocess.TimeoutExpired:
+        return False, "", "命令执行超时"
+    out = r.stdout.strip()
+    if r.returncode != 0:
+        return False, out[:200], (r.stderr or r.stdout).strip()[:200]
+    op = a.get("op", "contains")
+    exp = a.get("expect", "")
+    if op == "contains":
+        if isinstance(exp, list):  # 单值 list 容错：逐个包含
+            return all(e in out for e in exp), out, None
+        return exp in out, out, None
+    if op == "contains_all":
+        return all(e in out for e in exp), out, None
+    if op == "contains_any":
+        return any(e in out for e in exp), out, None
+    if op == "equals":
+        return out == exp, out, None
+    if op == "re":
+        return re.search(exp, out) is not None, out, None
+    if op == "nonempty":
+        return bool(out), out, None
+    return False, out, f"未知断言算子: {op}"
+
+
+def run_case_once(case, idx, base_cmd, cmd_timeout, failures_dir):
+    """执行一个用例的一次完整运行：steps（指令层）+ asserts（功能层）
+
+    指令成功 = 所有 steps 命令 rc==0；
+    功能成功 = 指令成功 且 所有 asserts 通过。
+    任一层失败都会自动截图留证到 failures_dir。
+    """
+    # 目录名务必短：Unix socket 路径上限 103 字节，长用例名会超限
+    iso = tempfile.mkdtemp(prefix=f"c{idx % 100}-{os.getpid()}-")
+    env = os.environ.copy()
+    env["AGENT_BROWSER_SOCKET_DIR"] = iso
+    env["AGENT_BROWSER_PROFILE"] = os.path.join(iso, "profile")
+    env["AGENT_BROWSER_IDLE_TIMEOUT_MS"] = "15000"
+
+    shots = []
+
+    def snap(tag):
+        try:
+            os.makedirs(failures_dir, exist_ok=True)
+            path = os.path.join(
+                failures_dir,
+                f"{case['name']}__run{idx}__{tag}__{time.strftime('%H%M%S')}.png")
+            subprocess.run(base_cmd + ["screenshot", path], env=env,
+                           capture_output=True, timeout=30)
+            if os.path.exists(path):
+                shots.append(path)
+        except Exception:
+            pass
+
+    timings, assert_log = [], []
+    instr_ok, func_ok = True, True
+    err = None
+    wall0 = time.perf_counter()
+    try:
+        base = case.get("base_url", "")
+        for si, args in enumerate(case["steps"]):
+            argv = base_cmd + [a.replace("{start_url}", case["start_url"])
+                               .replace("{BASE}", base) for a in args]
+            t = time.perf_counter()
+            try:
+                r = subprocess.run(argv, env=env, capture_output=True,
+                                   text=True, timeout=cmd_timeout)
+                ms = (time.perf_counter() - t) * 1000
+                timings.append({"step": si, "cmd": args[0],
+                                "detail": " ".join(args[:2]),
+                                "ms": round(ms, 1), "rc": r.returncode})
+                if r.returncode != 0:
+                    instr_ok = False
+                    err = (f"step {si} ({' '.join(args)[:120]}): "
+                           f"{(r.stderr or r.stdout).strip()[:250]}")
+                    snap(f"step{si}")
+                    break
+            except subprocess.TimeoutExpired:
+                timings.append({"step": si, "cmd": args[0],
+                                "detail": " ".join(args[:2]),
+                                "ms": round((time.perf_counter() - t) * 1000, 1),
+                                "rc": -1})
+                instr_ok, err = False, f"step {si} ({args[0]}): 命令执行超时"
+                snap(f"step{si}")
+                break
+        if not instr_ok:
+            func_ok = False  # 指令失败 ⇒ 功能必然失败
+        elif case.get("asserts"):
+            for a in case["asserts"]:
+                ok, got, aerr = eval_assert(base_cmd, env, a, cmd_timeout)
+                assert_log.append({"desc": a.get("desc", ""),
+                                   "op": a.get("op", "contains"),
+                                   "expect": a.get("expect", ""),
+                                   "ok": ok, "got": got[:300]})
+                if not ok:
+                    func_ok = False
+            if not func_ok:
+                bad = next((x for x in assert_log if not x["ok"]), None)
+                if bad:
+                    err = f"断言失败 [{bad['desc']}]: got={bad['got'][:150]}"
+                snap("assert")
+    finally:
+        subprocess.run(base_cmd + ["close"], env=env,
+                       capture_output=True, timeout=30)
+        shutil.rmtree(iso, ignore_errors=True)
+
+    wall = (time.perf_counter() - wall0) * 1000
+    return {
+        "run": idx,
+        "case": case["name"],
+        "category": case.get("category", ""),
+        "instr_ok": instr_ok,
+        "func_ok": func_ok,
+        "err": err,
+        "wall_ms": round(wall, 1),
+        "steps": timings,
+        "asserts": assert_log,
+        "screenshots": shots,
+    }
+
+
+def run_cases_mode(args, base_cmd):
+    """用例合集模式：遍历 cases、跑 N 轮、双成功率 + 指令分桶统计"""
+    cases = load_cases(args.cases)
+    failures_dir = os.path.join(args.out, "failures")
+    os.makedirs(args.out, exist_ok=True)
+    print(f"[cases] 用例数: {len(cases)}，每个 {args.runs} 次，"
+          f"并发 {args.concurrency}，共 {len(cases) * args.runs} 次运行")
+    print(f"[cases] 合集: {args.cases}")
+
+    jobs = [(c, i) for c in cases for i in range(args.runs)]
+    results = []
+    t0 = time.perf_counter()
+    with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
+        futs = {pool.submit(run_case_once, c, i, base_cmd,
+                            args.timeout, failures_dir): (c, i)
+                for c, i in jobs}
+        for fut in as_completed(futs):
+            r = fut.result()
+            results.append(r)
+            tag = ("OK" if r["func_ok"] else
+                   ("INSTR-FAIL" if not r["instr_ok"] else "ASSERT-FAIL"))
+            print(f"[cases] {r['case']} run{r['run'] + 1}: "
+                  f"wall={r['wall_ms']:.0f}ms  {tag}"
+                  + (f"  {r['err']}" if tag != "OK" else ""))
+    total_wall = (time.perf_counter() - t0) * 1000
+
+    # ---- 汇总 ----
+    instr_ok_n = sum(1 for r in results if r["instr_ok"])
+    func_ok_n = sum(1 for r in results if r["func_ok"])
+    per_case = {}
+    for c in cases:
+        rs = [r for r in results if r["case"] == c["name"]]
+        per_case[c["name"]] = {
+            "category": c.get("category", ""),
+            "env": c.get("env", ""),
+            "runs": len(rs),
+            "instr_ok": sum(1 for r in rs if r["instr_ok"]),
+            "func_ok": sum(1 for r in rs if r["func_ok"]),
+            "wall_stats": stat_block([r["wall_ms"] for r in rs if r["func_ok"]]),
+        }
+    # 指令分桶：按命令动词聚合（仅统计成功 run 的指令）
+    buckets = {}
+    for r in results:
+        if not r["instr_ok"]:
+            continue
+        for t in r["steps"]:
+            buckets.setdefault(t["cmd"], []).append(t["ms"])
+    bucket_stats = {k: stat_block(v) for k, v in sorted(buckets.items())}
+    # 分类聚合
+    per_cat = {}
+    for c in cases:
+        cat = c.get("category", "uncategorized")
+        rs = [r for r in results if r["case"] == c["name"]]
+        d = per_cat.setdefault(cat, {"runs": 0, "instr_ok": 0, "func_ok": 0})
+        d["runs"] += len(rs)
+        d["instr_ok"] += sum(1 for r in rs if r["instr_ok"])
+        d["func_ok"] += sum(1 for r in rs if r["func_ok"])
+
+    # ---- 控制台输出 ----
+    n_total = len(results)
+    print(f"\n===== 总览：{n_total} 次运行 =====")
+    print(f"指令成功率: {instr_ok_n}/{n_total}"
+          f" ({100 * instr_ok_n / n_total:.1f}%)")
+    print(f"功能成功率: {func_ok_n}/{n_total}"
+          f" ({100 * func_ok_n / n_total:.1f}%)")
+    print(f"整体耗时: {total_wall:.0f}ms")
+    print("\n===== 各用例 =====")
+    print(f"{'case':<38}{'instr':>8}{'func':>8}{'p50(ms)':>10}{'p95(ms)':>10}")
+    for name, d in per_case.items():
+        ws = d["wall_stats"]
+        p50 = f"{ws['p50']:.0f}" if ws.get("n") else "-"
+        p95 = f"{ws['p95']:.0f}" if ws.get("n") else "-"
+        print(f"{name:<38}"
+              f"{d['instr_ok']}/{d['runs']:>4}{d['func_ok']}/{d['runs']:>4}"
+              f"{p50:>10}{p95:>10}")
+    print("\n===== 指令分桶耗时 (成功 run, ms) =====")
+    print(f"{'bucket':<12}{'n':>5}{'p50':>10}{'mean':>10}{'p95':>10}{'max':>10}")
+    for k, s in bucket_stats.items():
+        if s.get("n", 0) == 0:
+            continue
+        print(f"{k:<12}{s['n']:>5}{s['p50']:>10}{s['mean']:>10}"
+              f"{s['p95']:>10}{s['max']:>10}")
+    fails = [r for r in results if not r["func_ok"]]
+    if fails:
+        print(f"\n===== 失败明细（{len(fails)}，截图见 {failures_dir}）=====")
+        for r in fails:
+            print(f"  {r['case']} run{r['run'] + 1}: {r['err']}")
+
+    # ---- 落盘 ----
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    report = {
+        "timestamp": ts,
+        "mode": "cases",
+        "cases_dir": args.cases,
+        "command": " ".join(base_cmd),
+        "platform": f"{platform.system()} {platform.release()} ({platform.machine()})",
+        "runs_per_case": args.runs,
+        "concurrency": args.concurrency,
+        "total_wall_ms": round(total_wall, 1),
+        "instr_ok": instr_ok_n,
+        "func_ok": func_ok_n,
+        "total": n_total,
+        "per_case": per_case,
+        "per_category": per_cat,
+        "bucket_stats": bucket_stats,
+        "raw": results,
+    }
+    json_path = os.path.join(args.out, "cases-results.json")
+    md_path = os.path.join(args.out, "cases-report.md")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    lines = [
+        "# agent-browser 用例合集基准报告",
+        "",
+        f"- 时间：{ts}",
+        f"- 平台：{report['platform']}",
+        f"- 合集：`{args.cases}`（{len(cases)} 个用例，每个 {args.runs} 次，"
+        f"并发 {args.concurrency}）",
+        f"- 结果：指令成功 {instr_ok_n}/{n_total}，功能成功 {func_ok_n}/{n_total}",
+        "",
+        "## 成功率",
+        "",
+        "| 口径 | 数值 |",
+        "|---|---|",
+        f"| 指令成功率（所有命令 rc==0） | {instr_ok_n}/{n_total} "
+        f"({100 * instr_ok_n / n_total:.1f}%) |",
+        f"| 功能成功率（断言全部通过） | {func_ok_n}/{n_total} "
+        f"({100 * func_ok_n / n_total:.1f}%) |",
+        "",
+        "## 各用例",
+        "",
+        "| 用例 | 分类 | 指令成功 | 功能成功 | wall p50 (ms) | wall p95 (ms) |",
+        "|---|---|---|---|---|---|",
+    ]
+    for name, d in per_case.items():
+        ws = d["wall_stats"]
+        p50 = f"{ws['p50']:.0f}" if ws.get("n") else "-"
+        p95 = f"{ws['p95']:.0f}" if ws.get("n") else "-"
+        lines.append(f"| {name} | {d['category']} | {d['instr_ok']}/{d['runs']} | "
+                     f"{d['func_ok']}/{d['runs']} | {p50} | {p95} |")
+    lines += ["", "## 指令分桶耗时（成功 run，ms）", "",
+              "| 指令 | n | p50 | mean | p95 | max |",
+              "|---|---|---|---|---|---|"]
+    for k, s in bucket_stats.items():
+        if s.get("n", 0) == 0:
+            continue
+        lines.append(f"| {k} | {s['n']} | {s['p50']} | {s['mean']} | "
+                     f"{s['p95']} | {s['max']} |")
+    lines += ["", "## 分类聚合", "", "| 分类 | 指令成功 | 功能成功 |",
+              "|---|---|---|"]
+    for cat, d in per_cat.items():
+        lines.append(f"| {cat} | {d['instr_ok']}/{d['runs']} | "
+                     f"{d['func_ok']}/{d['runs']} |")
+    if fails:
+        lines += ["", "## 失败明细", ""]
+        for r in fails:
+            lines.append(f"- **{r['case']}** run {r['run'] + 1}: `{r['err']}`")
+            for s in r.get("screenshots", []):
+                lines.append(f"  - 截图：`{s}`")
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    archived = archive_with_timestamp([md_path, json_path], args.out)
+    print(f"\n[cases] 报告: {md_path}\n[cases] 数据: {json_path}"
+          f"\n[cases] 已按时间戳留档: {archived[0]}")
+    sys.exit(0 if not fails else 2)
+
+
 def main():
     ap = argparse.ArgumentParser(description="agent-browser 指令级基准测试")
     ap.add_argument("-n", "--runs", type=int, default=5, help="总运行次数（默认 5）")
@@ -158,14 +491,22 @@ def main():
                     help="agent-browser 可执行文件路径（默认从 PATH/npx 查找）")
     ap.add_argument("--timeout", type=float, default=180,
                     help="单条命令超时秒数（默认 180）")
-    ap.add_argument("--out", default=os.path.join(HERE, "bench"),
-                    help="报告输出路径前缀（默认 bench/bench）")
+    ap.add_argument("--out", default=HERE,
+                    help="报告输出目录（默认 bench/）")
+    ap.add_argument("--cases", default=None, metavar="DIR",
+                    help="用例合集模式：指定 cases/ 目录，遍历其中 *.json "
+                         "（报告输出 bench/cases-report.md + cases-results.json，"
+                         "失败自动截图到 bench/failures/）")
     args = ap.parse_args()
 
     if args.runs < 1 or args.concurrency < 1:
         sys.exit("错误：runs/concurrency 需 >= 1")
-    page_url = args.url or ("file://" + DEFAULT_PAGE)
     base_cmd = resolve_bin(args.bin)
+
+    if args.cases:
+        run_cases_mode(args, base_cmd)  # 内部在结束时 sys.exit()
+
+    page_url = args.url or ("file://" + DEFAULT_PAGE)
 
     print(f"[bench] runs={args.runs} concurrency={args.concurrency}")
     print(f"[bench] 入口: {page_url}")
@@ -227,8 +568,9 @@ def main():
         "step_stats": step_stats,
         "raw": results,
     }
-    json_path = f"{args.out}-results.json"
-    md_path = f"{args.out}-report.md"
+    json_path = os.path.join(args.out, "bench-results.json")
+    md_path = os.path.join(args.out, "bench-report.md")
+    os.makedirs(args.out, exist_ok=True)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
@@ -272,9 +614,11 @@ def main():
                      f"{r['wall_ms']:.0f} | {r['steps_sum_ms']:.0f} |")
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
+    archived = archive_with_timestamp([md_path, json_path], args.out)
 
     print(f"\n[bench] 报告已写入: {md_path}")
     print(f"[bench] 原始数据已写入: {json_path}")
+    print(f"[bench] 已按时间戳留档: {archived[0]}")
     sys.exit(0 if not fail_runs else 2)
 
 

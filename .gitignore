@@ -7,3 +7,7 @@ __pycache__/
 # 基准测试报告（bench.py 运行时自动生成）
 bench/bench-report.md
 bench/bench-results.json
+bench/cases-report.md
+bench/cases-results.json
+bench/failures/
+bench/archive/

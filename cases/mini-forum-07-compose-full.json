@@ -1,0 +1,37 @@
+{
+  "name": "mini-forum-07-compose-full",
+  "env": "mini-forum",
+  "category": "compose",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/login.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/compose.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#post-title", "Why does my docker build cache get invalidated so often"],
+    ["fill", "#editor", "Every tiny source file change invalidates all my layers even when the COPY order should prevent it."],
+    ["click", "#tag-dropdown-toggle"],
+    ["click", ".tag-option[data-value='tech']"],
+    ["click", "#submit-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "发帖全流程：contenteditable 编辑器 fill + 陷阱F1 自定义 div 标签下拉（select 指令无效，必须 click toggle 展开后 click 选项）+ 提交跳转新帖详情（id=9，静态推演）",
+  "asserts": [
+    {
+      "desc": "新帖 Topic #9 创建成功：标题/作者/标签齐全",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": [
+        "Why does my docker build cache get invalidated so often",
+        "Topic #9",
+        "Alice Chen",
+        "tech"
+      ]
+    }
+  ]
+}

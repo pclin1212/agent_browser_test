@@ -1,0 +1,227 @@
+/* mini-forum（NodeBB 论坛复刻） */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #f6f8fa;
+}
+a { color: #1b9578; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 顶栏 */
+header.site {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 20px;
+  height: 50px;
+  background: #2c3e50;
+  color: #e8e8e8;
+}
+header.site .logo { color: #7fd7b8; font-weight: 700; font-size: 17px; }
+header.site .site-nav a { color: #cfcfd8; margin-right: 16px; font-weight: 500; }
+header.site .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+header.site .header-user { color: #7fd7b8; }
+header.site .header-right a { color: #cfcfd8; }
+.btn-compose {
+  background: #1b9578;
+  color: #fff !important;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.btn-compose:hover { background: #178066; text-decoration: none; }
+
+main { max-width: 900px; margin: 0 auto; padding: 16px 20px 60px; }
+.breadcrumb { color: #777; font-size: 12px; margin-bottom: 8px; }
+h1 { font-size: 22px; margin: 4px 0 12px; }
+h2 { font-size: 16px; margin: 24px 0 10px; }
+
+/* 搜索 + 分类 */
+#search-form { display: flex; gap: 8px; margin-bottom: 12px; }
+#search-form input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.category-bar { margin-bottom: 10px; }
+.cat-link {
+  display: inline-block;
+  padding: 4px 12px;
+  margin-right: 6px;
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  background: #fff;
+  color: #555;
+}
+.cat-link.active { background: #1b9578; border-color: #1b9578; color: #fff; }
+
+/* 帖子表 */
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+}
+table.grid th, table.grid td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+table.grid th { background: #f0f4f6; font-size: 12px; color: #666; }
+table.grid td.empty { text-align: center; color: #999; padding: 24px; }
+.topic-link { font-weight: 600; font-size: 15px; }
+.topic-tags { margin-top: 4px; }
+.tag {
+  display: inline-block;
+  background: #eef7f3;
+  color: #1b9578;
+  border: 1px solid #cde8dd;
+  border-radius: 3px;
+  padding: 1px 7px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+/* 帖子详情 */
+#topic-meta { color: #777; font-size: 13px; margin-bottom: 14px; }
+.post {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+.post-head { display: flex; flex-direction: column; gap: 6px; }
+.post-author { color: #1b9578; font-weight: 700; }
+.post-body { color: #333; }
+.post-foot { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+.upvote-btn {
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: #c0392b;
+}
+.upvote-btn:hover { background: #fdf0ee; }
+.votes-count { font-weight: 700; color: #c0392b; }
+
+/* 回复树（嵌套 ol/ol） */
+.reply-list { list-style: none; padding-left: 0; margin: 0; }
+.reply-list.nested { padding-left: 28px; border-left: 2px solid #e2e2e2; margin-left: 6px; }
+.reply-item { margin-bottom: 6px; }
+
+/* 回复框 */
+.reply-box { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.reply-box textarea {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* 发帖页 */
+.compose {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.compose label { color: #555; font-weight: 600; }
+.compose input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.editor {
+  min-height: 110px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fff;
+}
+.editor:focus { outline: 2px solid #7fd7b8; }
+
+/* [陷阱F1] 自定义 div 标签下拉 */
+.tag-picker { position: relative; }
+.tag-dropdown {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  top: 34px;
+  left: 0;
+  width: 320px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+}
+.tag-dropdown.open { display: block; }
+.tag-option {
+  display: block;
+  padding: 6px 14px;
+  color: #333;
+}
+.tag-option:hover { background: #f0f4f6; text-decoration: none; }
+.tag-option.selected { background: #eef7f3; color: #1b9578; font-weight: 700; }
+.selected-tags { margin-left: 8px; }
+
+/* 成员页 */
+.user-search { display: flex; gap: 8px; margin-bottom: 14px; }
+.user-search input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.user-list { list-style: none; padding: 0; margin: 0; }
+.user-row {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.user-handle { color: #1b9578; font-weight: 600; }
+.user-meta { color: #777; font-size: 12px; margin-top: 4px; }
+
+/* 按钮 / 通用 */
+.btn, .btn-primary {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-primary {
+  background: #1b9578;
+  border-color: #1b9578;
+  color: #fff;
+  align-self: flex-start;
+}
+.err { color: #c0392b; margin-top: 8px; min-height: 16px; }
+
+/* 登录表单 */
+.form {
+  max-width: 380px;
+  margin: 40px auto;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 24px 28px;
+}
+.form label { display: block; margin: 12px 0 4px; color: #555; }
+.form input { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; }
+.form .btn-primary { margin-top: 16px; width: 100%; }

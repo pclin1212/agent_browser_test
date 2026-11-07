@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shopping Cart - One Stop Market</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <a href="../../../customer/account/login/">Sign In</a>
+  <a href="../../../checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="../../../">Home</a> / Shopping Cart</nav>
+  <div id="cart-box"></div>
+</main>
+<script src="../../data.js"></script>
+<script src="../../app.js"></script>
+<script>MS.renderCart(document.getElementById("cart-box"));</script>
+</body>
+</html>

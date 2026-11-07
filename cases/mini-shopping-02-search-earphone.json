@@ -1,0 +1,31 @@
+{
+  "name": "mini-shopping-02-search-earphone",
+  "env": "mini-shopping",
+  "category": "search",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/",
+  "steps": [
+    ["open", "{BASE}/"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#search"],
+    ["press", "e"],
+    ["press", "a"],
+    ["press", "r"],
+    ["press", "p"],
+    ["press", "h"],
+    ["press", "o"],
+    ["press", "n"],
+    ["press", "e"],
+    ["press", "Enter"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "陷阱1：搜索框只认真实键事件，fill/type 会被静默拦截，必须逐字符 press",
+  "asserts": [
+    {
+      "desc": "搜索结果页标题与已知第一页价格",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Search results for: 'earphone'", "$306.68"]
+    }
+  ]
+}

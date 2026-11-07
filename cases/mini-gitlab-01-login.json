@@ -1,0 +1,24 @@
+{
+  "name": "mini-gitlab-01-login",
+  "env": "mini-gitlab",
+  "category": "auth",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "登录成功后跳回项目首页，顶栏显示用户名",
+  "asserts": [
+    {
+      "desc": "首页顶栏出现已登录用户名 Administrator",
+      "cmd": ["get", "text", "#site-header"],
+      "op": "contains_all",
+      "expect": ["telemetry-dashboard", "Administrator"]
+    }
+  ]
+}

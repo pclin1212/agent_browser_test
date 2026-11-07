@@ -1,0 +1,28 @@
+{
+  "name": "mini-forum-11-anonymous-reply-blocked",
+  "env": "mini-forum",
+  "category": "interaction",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/topic/1/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#reply-content", "This reply should not be posted."],
+    ["click", "#reply-submit"]
+  ],
+  "steps_note": "未登录回复静默拦截（同陷阱F2 家族）：rc==0、无导航，行内报错 + 回复计数不变",
+  "asserts": [
+    {
+      "desc": "行内报错提示需登录",
+      "cmd": ["get", "text", "#reply-err"],
+      "op": "contains",
+      "expect": "Please log in to reply."
+    },
+    {
+      "desc": "回复计数保持 2 不变",
+      "cmd": ["get", "text", "#reply-count"],
+      "op": "equals",
+      "expect": "2"
+    }
+  ]
+}

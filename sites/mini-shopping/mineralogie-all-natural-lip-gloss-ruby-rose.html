@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mineralogie All Natural Lip Gloss - Ruby Rose - One Stop Market</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Search entire store here..." aria-label="Search">
+    <button title="Search">Go</button>
+  </div>
+  <a href="customer/account/login/">Sign In</a>
+  <a href="checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="/">Home</a> / Beauty / Lip Care</nav>
+  <div class="product-view">
+    <div class="product-info">
+      <div class="product-media">product image</div>
+      <div>
+        <h1 id="product-name">Mineralogie All Natural Lip Gloss - Ruby Rose</h1>
+        <div id="product-price">$14.50</div>
+        <div id="option-msg" role="alert"></div>
+        <button id="product-addtocart-button" title="Add to Cart">Add to Cart</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab-labels">
+        <button id="tab-label-details" class="active">Details</button>
+        <button id="tab-label-reviews">Reviews</button>
+      </div>
+      <div id="details">
+        <p>All natural mineral lip gloss with a smooth ruby rose finish. Paraben free,
+          cruelty free, made with nourishing botanical oils.</p>
+      </div>
+      <div id="reviews" style="display:none"></div>
+    </div>
+  </div>
+</main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  MS.initSearchTrap("#search");
+  MS.initProduct("mineralogie-all-natural-lip-gloss-ruby-rose.html");
+</script>
+</body>
+</html>

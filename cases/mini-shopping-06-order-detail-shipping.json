@@ -1,0 +1,25 @@
+{
+  "name": "mini-shopping-06-order-detail-shipping",
+  "env": "mini-shopping",
+  "category": "order",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/customer/account/login/",
+  "steps": [
+    ["open", "{BASE}/customer/account/login/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#email", "emma.lopez@gmail.com"],
+    ["fill", "#pass", "Password.123"],
+    ["click", "#send2"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/sales/order/view/order_id/187/"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "订单 187 物流方式 Flat Rate - Fixed",
+      "cmd": ["get", "text", "body"],
+      "op": "contains",
+      "expect": "Flat Rate - Fixed"
+    }
+  ]
+}

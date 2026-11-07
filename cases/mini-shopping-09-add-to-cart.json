@@ -1,0 +1,24 @@
+{
+  "name": "mini-shopping-09-add-to-cart",
+  "env": "mini-shopping",
+  "category": "cart",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html",
+  "steps": [
+    ["open", "{BASE}/6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html"],
+    ["wait", "--load", "networkidle"],
+    ["click", "input[name=\"options[51745]\"]"],
+    ["click", "#product-addtocart-button"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/checkout/cart/"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "asserts": [
+    {
+      "desc": "购物车含该商品",
+      "cmd": ["get", "text", "body"],
+      "op": "contains",
+      "expect": "6S Wireless Headphones"
+    }
+  ]
+}

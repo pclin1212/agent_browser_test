@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>6S Wireless Headphones - One Stop Market</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Search entire store here..." aria-label="Search">
+    <button title="Search">Go</button>
+  </div>
+  <a href="customer/account/login/">Sign In</a>
+  <a href="checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="/">Home</a> / Headphones / Wireless Kid Headsets</nav>
+  <div class="product-view">
+    <div class="product-info">
+      <div class="product-media">product image</div>
+      <div>
+        <h1 id="product-name">6S Wireless Headphones</h1>
+        <div id="product-price">$25.99</div>
+        <fieldset class="options">
+          <legend id="option-label">Color <span title="Required">*</span></legend>
+          <label><input type="radio" name="options[51745]" value="Black &amp; Gold"> Black &amp; Gold</label>
+          <label><input type="radio" name="options[51745]" value="Black &amp; Red"> Black &amp; Red</label>
+        </fieldset>
+        <div id="option-msg" role="alert"></div>
+        <button id="product-addtocart-button" title="Add to Cart">Add to Cart</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab-labels">
+        <button id="tab-label-details" class="active">Details</button>
+        <button id="tab-label-reviews">Reviews</button>
+      </div>
+      <div id="details">
+        <p>Over-ear noise canceling wireless headphones with hi-fi bass, foldable design,
+          built-in mic, micro SD/TF and FM support for iPhone / Samsung / iPad / PC.</p>
+      </div>
+      <div id="reviews" style="display:none"></div>
+    </div>
+  </div>
+</main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  MS.initSearchTrap("#search");
+  MS.initProduct("6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html");
+</script>
+</body>
+</html>
