@@ -33,11 +33,11 @@ var MS = {
     var t = localStorage.getItem("ms_token");
     return t && MS_USERS[t] ? MS_USERS[t] : null;
   },
-  // 受保护页：未登录跳回登录页（相对路径前缀 = 目录深度）
+  // 受保护页：未登录跳回登录页（相对路径前缀 = 目录深度；目录 URL 与文件 URL 均适用）
   requireAuth: function () {
     if (!MS.user()) {
-      var segs = window.location.pathname.split("/").filter(Boolean);
-      var prefix = new Array(segs.length).join("../");  // segs 含文件名，故重复 segs-1 次
+      var segs = window.location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+      var prefix = new Array(segs.length + 1).join("../");
       window.location.replace(prefix + "customer/account/login/");
     }
   },

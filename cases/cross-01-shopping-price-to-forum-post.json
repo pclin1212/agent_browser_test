@@ -1,0 +1,44 @@
+{
+  "name": "cross-01-shopping-price-to-forum-post",
+  "env": "cross",
+  "category": "cross-site",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#search"],
+    ["press", "u"],
+    ["press", "g"],
+    ["press", "r"],
+    ["press", "e"],
+    ["press", "e"],
+    ["press", "n"],
+    ["press", "Enter"],
+    ["wait", "--load", "networkidle"],
+    ["get", "text", "#results"],
+    ["open", "http://127.0.0.1:8020/login.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "http://127.0.0.1:8020/compose.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#post-title", "Ugreen charger price drop: only $6.99 at One Stop Market"],
+    ["fill", "#editor", "Found the ugreen charger on One Stop Market for $6.99, sharing the deal here."],
+    ["click", "#tag-dropdown-toggle"],
+    ["click", ".tag-option[data-value='tech']"],
+    ["click", "#submit-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "跨站任务（WebArena 缺口）：同一浏览器会话内先在 mini-shopping 搜索 ugreen 读价格 $6.99（keydown 陷阱需逐字符 press），再把价格信息带到 mini-forum 发帖（数据为冻结静态值，跨站信息由用例编排承载）",
+  "asserts": [
+    {
+      "desc": "论坛新帖创建成功且含跨站带来的价格",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["Ugreen charger price drop: only $6.99", "Topic #9", "$6.99"]
+    }
+  ]
+}

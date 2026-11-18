@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - nodeforum</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb">Topics / <strong>Settings</strong></nav>
+  <h1>Profile Settings</h1>
+  <div class="compose" id="settings-box">
+    <label for="display-name">Display Name</label>
+    <input id="display-name" type="text" placeholder="Shown next to your posts">
+    <label for="bio">Bio</label>
+    <textarea id="bio" rows="4" placeholder="A short introduction"></textarea>
+    <button class="btn-primary" id="save-profile" type="button">Save Profile</button>
+    <div class="msg" id="profile-saved"></div>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MF.requireAuth()) {
+    MF.renderHeader();
+    (function () {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem("mf_profile") || "{}"); } catch (e) {}
+      if (saved.displayName) document.getElementById("display-name").value = saved.displayName;
+      if (saved.bio) document.getElementById("bio").value = saved.bio;
+      document.getElementById("save-profile").addEventListener("click", function () {
+        var p = {
+          displayName: document.getElementById("display-name").value,
+          bio: document.getElementById("bio").value
+        };
+        localStorage.setItem("mf_profile", JSON.stringify(p));
+        document.getElementById("profile-saved").textContent =
+          "Profile saved: " + p.displayName + " - " + p.bio;
+      });
+    })();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Account Information - One Stop Market</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+<header class="site">
+  <a class="logo" href="/">One Stop Market</a>
+  <a href="../../../customer/account/">My Account</a>
+  <a href="../../../checkout/cart/">Cart</a>
+</header>
+<main>
+  <nav class="breadcrumb"><a href="../../../">Home</a> / <a href="../../../customer/account/">My Account</a> / Edit Account Information</nav>
+  <div class="form">
+    <h1>Edit Account Information</h1>
+    <form id="account-form">
+      <label for="firstname">First Name</label>
+      <input id="firstname" name="firstname" type="text" value="Emma">
+      <label for="lastname">Last Name</label>
+      <input id="lastname" name="lastname" type="text" value="Lopez">
+      <label for="newsletter">
+        <input id="newsletter" name="newsletter" type="checkbox" checked> Sign up for the newsletter
+      </label>
+      <button class="submit" id="save-account" type="button">Save Account</button>
+      <div class="msg" id="account-saved"></div>
+    </form>
+  </div>
+</main>
+<script src="../../../data.js"></script>
+<script src="../../../app.js"></script>
+<script>
+  // 目录 URL（/customer/account/edit/）深度 3，回根需 3 级 ../
+  if (MS.user()) {
+    (function () {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem("ms_account") || "{}"); } catch (e) {}
+      if (saved.firstname) document.getElementById("firstname").value = saved.firstname;
+      if (saved.lastname) document.getElementById("lastname").value = saved.lastname;
+      if (saved.newsletter !== undefined)
+        document.getElementById("newsletter").checked = !!saved.newsletter;
+      document.getElementById("save-account").addEventListener("click", function () {
+        var a = {
+          firstname: document.getElementById("firstname").value,
+          lastname: document.getElementById("lastname").value,
+          newsletter: document.getElementById("newsletter").checked
+        };
+        localStorage.setItem("ms_account", JSON.stringify(a));
+        document.getElementById("account-saved").textContent =
+          "Account information saved: " + a.firstname + " " + a.lastname +
+          (a.newsletter ? " (subscribed to newsletter)" : " (not subscribed)");
+      });
+    })();
+  } else {
+    window.location.replace("../../../customer/account/login/");
+  }
+</script>
+</body>
+</html>

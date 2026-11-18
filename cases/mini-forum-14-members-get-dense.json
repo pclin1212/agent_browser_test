@@ -1,0 +1,41 @@
+{
+  "name": "mini-forum-14-members-get-dense",
+  "env": "mini-forum",
+  "category": "members",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/user.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#user-search", "a"],
+    ["click", "#user-search-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "get/断言密集（压测分桶）：单字母 a 命中 alice（用户名含 a）与 carol（用户名含 a），排除 bob（用户名与姓名均无 a）；4 条终态断言混合 get/eval/正负向",
+  "asserts": [
+    {
+      "desc": "命中 Alice Chen 与 Carol Diaz",
+      "cmd": ["get", "text", "#user-results"],
+      "op": "contains_all",
+      "expect": ["Alice Chen", "Carol Diaz"]
+    },
+    {
+      "desc": "bob 被过滤（负向断言）",
+      "cmd": ["get", "text", "#user-results"],
+      "op": "re",
+      "expect": "(?s)^(?!.*Bob Smith)"
+    },
+    {
+      "desc": "命中成员的邮箱可见",
+      "cmd": ["get", "text", "#user-results"],
+      "op": "contains_all",
+      "expect": ["alice@example.com", "carol@example.com"]
+    },
+    {
+      "desc": "eval 统计结果行数 = 2",
+      "cmd": ["eval", "document.querySelectorAll('#user-results .user-row').length"],
+      "op": "contains",
+      "expect": "2"
+    }
+  ]
+}

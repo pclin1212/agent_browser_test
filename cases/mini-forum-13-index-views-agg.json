@@ -1,0 +1,32 @@
+{
+  "name": "mini-forum-13-index-views-agg",
+  "env": "mini-forum",
+  "category": "topics",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "聚合类：首页话题列表 eval 求和全部浏览量（冻结 8 帖 views 512+890+233+641+377+456+298+190 = 3597）+ eval 统计话题行数",
+  "asserts": [
+    {
+      "desc": "eval 求和浏览量 = 3597",
+      "cmd": ["eval", "Array.from(document.querySelectorAll('#topic-list tr.topic-row .cell-views')).reduce((a,e)=>a+parseInt(e.textContent,10),0)"],
+      "op": "contains",
+      "expect": "3597"
+    },
+    {
+      "desc": "eval 统计话题行数 = 8",
+      "cmd": ["eval", "document.querySelectorAll('#topic-list tr.topic-row').length"],
+      "op": "contains",
+      "expect": "8"
+    },
+    {
+      "desc": "最高浏览量帖（890，Chrome 帖）在列表中",
+      "cmd": ["get", "text", "#topic-list"],
+      "op": "contains_all",
+      "expect": ["890"]
+    }
+  ]
+}

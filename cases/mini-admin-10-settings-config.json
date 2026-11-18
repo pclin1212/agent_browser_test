@@ -1,0 +1,42 @@
+{
+  "name": "mini-admin-10-settings-config",
+  "env": "mini-admin",
+  "category": "settings",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/settings/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#store-name", "One Stop Market EU"],
+    ["select", "#timezone", "Asia/Shanghai"],
+    ["select", "#order-auto-assign", "auto"],
+    ["click", "#save-settings"]
+  ],
+  "steps_note": "配置操作类（WebArena 缺口）：设置页 fill + 双 select + click 保存，回显消息含全部已保存值",
+  "asserts": [
+    {
+      "desc": "保存成功提示包含店名/时区/自动分配",
+      "cmd": ["get", "text", "#settings-saved"],
+      "op": "contains_all",
+      "expect": ["Settings saved", "One Stop Market EU", "Asia/Shanghai", "auto"]
+    },
+    {
+      "desc": "timezone select 当前值为 Asia/Shanghai",
+      "cmd": ["eval", "document.querySelector('#timezone').value"],
+      "op": "contains",
+      "expect": "Asia/Shanghai"
+    },
+    {
+      "desc": "order-auto-assign select 当前值为 auto",
+      "cmd": ["eval", "document.querySelector('#order-auto-assign').value"],
+      "op": "contains",
+      "expect": "auto"
+    }
+  ]
+}

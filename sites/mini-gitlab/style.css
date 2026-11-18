@@ -97,6 +97,7 @@ table.issues-table td.empty { color: #666; text-align: center; }
   padding: 11px 22px; font-size: 15px; border-radius: 4px; cursor: pointer; margin-top: 20px;
 }
 .form .err { color: #c0392b; font-size: 14px; margin-top: 12px; min-height: 18px; }
+.form .msg { color: #2e7d32; font-size: 14px; margin-top: 12px; min-height: 18px; }
 
 /* [陷阱G3] 自定义 div 下拉 */
 .dropdown { position: relative; margin-top: 4px; }

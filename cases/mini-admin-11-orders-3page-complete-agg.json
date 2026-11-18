@@ -1,0 +1,47 @@
+{
+  "name": "mini-admin-11-orders-3page-complete-agg",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["eval", "document.querySelectorAll('#orders-table tr.order-row span.badge-complete').length"],
+    ["click", "#pagination a.page-link[data-p='2']"],
+    ["wait", "--load", "networkidle"],
+    ["eval", "document.querySelectorAll('#orders-table tr.order-row span.badge-complete').length"],
+    ["click", "#pagination a.page-link[data-p='3']"],
+    ["wait", "--load", "networkidle"],
+    ["eval", "document.querySelectorAll('#orders-table tr.order-row span.badge-complete').length"],
+    ["open", "{BASE}/"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "跨页信息聚合（WebArena 缺口）：逐页 eval 统计 complete 徽标数（60 单四状态循环，每页 20 条各 5 单），再到 dashboard 对照 #stat-complete=15 / #stat-revenue / #stat-total",
+  "asserts": [
+    {
+      "desc": "dashboard complete 总数 = 三页逐页计数之和 = 15",
+      "cmd": ["get", "text", "#stat-complete"],
+      "op": "equals",
+      "expect": "15"
+    },
+    {
+      "desc": "dashboard 订单总数 60",
+      "cmd": ["get", "text", "#stat-total"],
+      "op": "equals",
+      "expect": "60"
+    },
+    {
+      "desc": "dashboard 营收总额（冻结数据静态推演）",
+      "cmd": ["get", "text", "#stat-revenue"],
+      "op": "equals",
+      "expect": "$26424.30"
+    }
+  ]
+}

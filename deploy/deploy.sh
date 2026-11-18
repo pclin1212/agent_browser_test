@@ -4,7 +4,7 @@
 # 用法（在仓库根目录执行）：
 #   ./deploy/deploy.sh                          前台启动 mail-demo，默认端口 8000，Ctrl+C 停止
 #   ./deploy/deploy.sh 8080                     前台启动 mail-demo，指定端口
-#   ./deploy/deploy.sh start [port] [site]      后台启动（deploy/.http-server*.pid / .log）
+#   ./deploy/deploy.sh start [port] [site]      后台启动（pid/log 写入 output/deploy/）
 #   ./deploy/deploy.sh stop [port] [site]       停止后台服务（含端口兜底清理）
 #   ./deploy/deploy.sh status [port] [site]     查看状态
 #
@@ -51,13 +51,26 @@ if [ ! -f "$SITE_DIR/index.html" ]; then
 fi
 DOC_ROOT="$(cd "$SITE_DIR" && pwd)"
 PORT="${2:-8000}"
+# 运行产物（pid/log）统一收纳在仓库 output/ 下：
+#   - start 每次自动创建独立目录 output/deploy_<时间戳>/（DEPLOY_OUT_DIR 可覆盖，
+#     deploy_all.sh 用它让一次批量启动的五站共享同一目录）
+#   - stop/status 跨所有 output/deploy_*/ 目录查找 pid（兼容旧版平铺 output/deploy/）
+OUT_ROOT="$HERE/../output"
 if [ "$SITE" = "mail" ]; then
-  PID_FILE="$HERE/.http-server.pid"
-  LOG_FILE="$HERE/.http-server.log"
+  PID_NAME=".http-server.pid"
+  LOG_NAME=".http-server.log"
 else
-  PID_FILE="$HERE/.http-server-$(basename "$SITE").pid"
-  LOG_FILE="$HERE/.http-server-$(basename "$SITE").log"
+  PID_NAME=".http-server-$(basename "$SITE").pid"
+  LOG_NAME=".http-server-$(basename "$SITE").log"
 fi
+OUT_DIR="${DEPLOY_OUT_DIR:-$OUT_ROOT/deploy_$(date +%Y%m%d-%H%M%S)}"
+PID_FILE="$OUT_DIR/$PID_NAME"
+LOG_FILE="$OUT_DIR/$LOG_NAME"
+
+# 该站点现有的 pid 文件（新时间戳目录 + 旧平铺目录都找，最新的在前）
+find_pids() {
+  ls -t "$OUT_ROOT"/deploy_*/"$PID_NAME" "$OUT_ROOT"/deploy/"$PID_NAME" 2>/dev/null || true
+}
 URL="http://127.0.0.1:${PORT}/index.html"
 
 PY="$(command -v python3 || command -v python || true)"
@@ -97,15 +110,31 @@ Server(("127.0.0.1", port), Handler).serve_forever()
 
 http_ok() { curl -sf -o /dev/null --max-time 2 "http://127.0.0.1:${PORT}/index.html"; }
 
-pid_alive() { [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; }
-
 serve_fg() {
   exec "$REAL_PY" -c "$TUNED_SERVER" "$PORT" "$DOC_ROOT"
 }
 
+# 找到该站点存活进程的 pid 文件（无则返回空）。
+# 注意：仅 kill -0 不够——服务器死亡后 pid 可能被系统其他进程复用，
+# 必须校验进程命令行确实包含本站 DOC_ROOT，避免误判"存活"（拒重启）或误杀。
+alive_pid_file() {
+  local pf pid cmd
+  for pf in $(find_pids); do
+    pid="$(cat "$pf" 2>/dev/null)" || continue
+    cmd="$(ps -p "$pid" -o command= 2>/dev/null)" || continue
+    case "$cmd" in
+      *"$DOC_ROOT"*) echo "$pf"; return 0 ;;
+    esac
+  done
+  return 0
+}
+
 start_bg() {
-  if pid_alive; then echo "已在运行 (pid $(cat "$PID_FILE"))，入口：$URL"; exit 0; fi
+  local pf
+  pf="$(alive_pid_file)"
+  if [ -n "$pf" ]; then echo "已在运行 (pid $(cat "$pf"))，入口：$URL"; exit 0; fi
   if http_ok; then echo "端口 $PORT 已有服务在响应：$URL"; exit 0; fi
+  mkdir -p "$OUT_DIR"
   ( nohup "$REAL_PY" -c "$TUNED_SERVER" "$PORT" "$DOC_ROOT" >"$LOG_FILE" 2>&1 & echo $! >"$PID_FILE" )
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     http_ok && { echo "已启动 (pid $(cat "$PID_FILE"))，入口：$URL"; exit 0; }
@@ -116,10 +145,15 @@ start_bg() {
 }
 
 stop_bg() {
-  if pid_alive; then
-    kill "$(cat "$PID_FILE")" 2>/dev/null || true
-  fi
-  rm -f "$PID_FILE"
+  local pf pid cmd
+  for pf in $(find_pids); do
+    pid="$(cat "$pf" 2>/dev/null)" || continue
+    cmd="$(ps -p "$pid" -o command= 2>/dev/null)" || true
+    case "$cmd" in
+      *"$DOC_ROOT"*) kill "$pid" 2>/dev/null || true ;;
+    esac
+    rm -f "$pf"
+  done
   # 兜底：等端口释放，仍被占用则按端口清监听进程（lsof 可用时）
   for _ in 1 2 3 4 5; do http_ok || break; sleep 0.4; done
   if http_ok && command -v lsof >/dev/null 2>&1; then
@@ -134,8 +168,10 @@ stop_bg() {
 }
 
 show_status() {
-  if pid_alive; then
-    echo "运行中 (pid $(cat "$PID_FILE"))，入口：${URL}，$(http_ok && echo 'HTTP OK' || echo 'HTTP 无响应')"
+  local pf
+  pf="$(alive_pid_file)"
+  if [ -n "$pf" ]; then
+    echo "运行中 (pid $(cat "$pf"))，入口：${URL}，$(http_ok && echo 'HTTP OK' || echo 'HTTP 无响应')"
   elif http_ok; then
     echo "端口 $PORT 有其他服务在响应：$URL"
   else

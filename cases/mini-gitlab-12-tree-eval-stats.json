@@ -1,0 +1,40 @@
+{
+  "name": "mini-gitlab-12-tree-eval-stats",
+  "env": "mini-gitlab",
+  "category": "tree",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/tree.html"],
+    ["wait", "--load", "networkidle"],
+    ["click", ".tree-item[data-path='src']"],
+    ["click", ".tree-item[data-path='src/utils']"]
+  ],
+  "steps_note": "eval 密集（压测分桶）：陷阱G1 逐层展开 src/ → src/utils/ 后，eval 统计懒渲染树的总节点数（根 4 + src 子层 4 + utils 子层 3 = 11）+ eval 深层文件存在性探针",
+  "asserts": [
+    {
+      "desc": "eval 统计树节点数 = 11",
+      "cmd": ["eval", "document.querySelectorAll('#tree-root .tree-item').length"],
+      "op": "contains",
+      "expect": "11"
+    },
+    {
+      "desc": "eval 深层文件 format.js 已渲染",
+      "cmd": ["eval", "document.querySelector(\".tree-item[data-path='src/utils/format.js']\") ? 'rendered' : 'missing'"],
+      "op": "contains",
+      "expect": "rendered"
+    },
+    {
+      "desc": "未展开的 tests/integration 深层文件不可见",
+      "cmd": ["eval", "document.querySelector(\".tree-item[data-path='tests/integration']\") ? 'rendered' : 'missing'"],
+      "op": "contains",
+      "expect": "missing"
+    }
+  ]
+}

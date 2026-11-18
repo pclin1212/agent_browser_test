@@ -52,7 +52,7 @@ var MA = {
       ? "<span class='header-user'>" + MA.esc(u.name) + "</span><a href='#' id='header-signout'>Sign out</a>"
       : "<a href='/admin/login/'>Sign in</a>";
     h.innerHTML = "<a class='logo' href='/'>magento admin</a>" +
-      "<nav class='site-nav'><a href='/'>Dashboard</a><a href='/admin/sales/order/'>Orders</a></nav>" +
+      "<nav class='site-nav'><a href='/'>Dashboard</a><a href='/admin/sales/order/'>Orders</a><a href='/admin/settings/'>Settings</a></nav>" +
       "<div class='header-right'>" + right + "</div>";
     var so = document.getElementById("header-signout");
     if (so) so.addEventListener("click", function () {

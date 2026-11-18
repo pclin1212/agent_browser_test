@@ -54,7 +54,7 @@ var MF = {
         "<span class='header-user'>" + MF.esc(u.name) + "</span><a href='#' id='header-signout'>Sign out</a>"
       : "<a class='btn-compose' href='/compose.html'>New Topic</a><a href='/login.html'>Log in</a>";
     h.innerHTML = "<a class='logo' href='/'>nodeforum</a>" +
-      "<nav class='site-nav'><a href='/'>Topics</a><a href='/user.html'>Members</a></nav>" +
+      "<nav class='site-nav'><a href='/'>Topics</a><a href='/user.html'>Members</a><a href='/settings.html'>Settings</a></nav>" +
       "<div class='header-right'>" + right + "</div>";
     var so = document.getElementById("header-signout");
     if (so) so.addEventListener("click", function () {

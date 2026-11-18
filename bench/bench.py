@@ -11,8 +11,9 @@
   python3 bench/bench.py --bin /path/to/agent-browser
   python3 bench/bench.py --url http://127.0.0.1:8000/index.html
 
-默认入口为仓库 html/index.html（file:// 协议），报告输出到 bench/ 目录
-（bench-report.md + bench-results.json）。
+默认入口为仓库 html/index.html（file:// 协议），报告输出到仓库根目录
+output/bench/（bench-report.md + bench-results.json），
+运行产物统一收纳在 output/ 目录。
 
 每个 run 都使用独立的一次性状态目录（socket + Chrome profile），互不干扰；
 daemon 空闲 15s 后自动退出，Chrome 随之关闭，系统零残留。
@@ -24,6 +25,7 @@ import json
 import math
 import os
 import platform
+import random
 import re
 import shutil
 import statistics
@@ -39,22 +41,16 @@ ROOT = os.path.dirname(HERE)  # 仓库根目录
 DEFAULT_PAGE = os.path.join(ROOT, "html", "index.html")
 
 
-def archive_with_timestamp(paths, out_dir):
-    """跑完自动按时间戳留档，避免下一轮运行覆盖上一轮报告/原始数据。
+def default_out_dir(args):
+    """默认产物目录：output/bench_c<并发>_n<次数>_<时间戳>。
 
-    归档到 <out_dir>/archive/<原名>-<YYYYMMDD-HHMMSS>.<ext>，
-    固定名文件（cases-report.md 等）继续作为"最新一轮"被覆盖。
+    每次运行独立目录，本次任务的所有产物（报告 / 原始 JSON / 失败截图）
+    都收纳在该目录下，天然不覆盖、不需要额外归档。
     """
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    arch = os.path.join(out_dir, "archive")
-    os.makedirs(arch, exist_ok=True)
-    saved = []
-    for p in paths:
-        stem, ext = os.path.splitext(os.path.basename(p))
-        dst = os.path.join(arch, f"{stem}-{stamp}{ext}")
-        shutil.copyfile(p, dst)
-        saved.append(dst)
-    return saved
+    return os.path.join(ROOT, "output",
+                        f"bench_c{args.concurrency}_n{args.runs}_{stamp}")
+
 
 STEPS = [
     ("open_login",    ["open", "{PAGE_URL}"]),
@@ -116,7 +112,54 @@ def stat_block(vals):
     }
 
 
-def run_once(idx, base_cmd, page_url, cmd_timeout):
+def fmt_dur(sec):
+    """秒数 → 人类可读时长（89 -> "1m29s"）"""
+    sec = int(sec)
+    if sec < 60:
+        return f"{sec}s"
+    m, s = divmod(sec, 60)
+    if m < 60:
+        return f"{m}m{s:02d}s"
+    h, m = divmod(m, 60)
+    return f"{h}h{m:02d}m"
+
+
+def show_progress(prefix, detail, done, total, t0):
+    """执行进度显示。
+
+    TTY（交互终端）：单行原地刷新进度条 + 百分比 + ETA + 最近完成事件；
+    重定向到文件/管道：逐行输出（带计数与 ETA），并强制 flush，
+    保证 tail -f 日志能实时看到进展。
+    """
+    elapsed = max(time.perf_counter() - t0, 1e-6)
+    eta = elapsed / done * (total - done) if done else 0
+    pct = 100.0 * done / total
+    if sys.stdout.isatty():
+        width = 26
+        filled = int(width * done / total)
+        bar = "#" * filled + "-" * (width - filled)
+        print(f"\r{prefix} |{bar}| {pct:5.1f}% ETA {fmt_dur(eta)} | "
+              f"{detail[:60]:<60}", end="", flush=True)
+        if done >= total:
+            print(flush=True)
+    else:
+        print(f"{prefix} ({pct:.0f}%, ETA {fmt_dur(eta)}) {detail}", flush=True)
+
+
+def think_sleep(think_ms, jitter_pct):
+    """指令间思考时间：模拟大模型生成下一条指令的间隙（含 ±jitter% 抖动）。
+
+    think_ms<=0 时是空操作（默认关闭，不影响既有口径的可比性）。
+    """
+    if think_ms <= 0:
+        return 0.0
+    jitter = think_ms * jitter_pct / 100.0
+    delay = random.uniform(think_ms - jitter, think_ms + jitter)
+    time.sleep(delay / 1000.0)
+    return delay
+
+
+def run_once(idx, base_cmd, page_url, cmd_timeout, think_ms=0, jitter_pct=0):
     """执行一次完整闭环，返回该 run 的计时数据"""
     iso = tempfile.mkdtemp(prefix=f"mail-bench-{idx}-")
     env = os.environ.copy()
@@ -129,7 +172,9 @@ def run_once(idx, base_cmd, page_url, cmd_timeout):
     wall0 = time.perf_counter()
     ok, err = True, None
     try:
-        for name, args in STEPS:
+        for si, (name, args) in enumerate(STEPS):
+            if si:  # 指令间思考时间（首条指令前不加）
+                think_sleep(think_ms, jitter_pct)
             argv = base_cmd + [a.replace("{PAGE_URL}", page_url) for a in args]
             t = time.perf_counter()
             r = subprocess.run(argv, env=env, capture_output=True,
@@ -216,7 +261,8 @@ def eval_assert(base_cmd, env, a, cmd_timeout):
     return False, out, f"未知断言算子: {op}"
 
 
-def run_case_once(case, idx, base_cmd, cmd_timeout, failures_dir):
+def run_case_once(case, idx, base_cmd, cmd_timeout, failures_dir,
+                  think_ms=0, jitter_pct=0):
     """执行一个用例的一次完整运行：steps（指令层）+ asserts（功能层）
 
     指令成功 = 所有 steps 命令 rc==0；
@@ -252,6 +298,8 @@ def run_case_once(case, idx, base_cmd, cmd_timeout, failures_dir):
     try:
         base = case.get("base_url", "")
         for si, args in enumerate(case["steps"]):
+            if si:  # 指令间思考时间（首条指令前不加；断言命令不加）
+                think_sleep(think_ms, jitter_pct)
             argv = base_cmd + [a.replace("{start_url}", case["start_url"])
                                .replace("{BASE}", base) for a in args]
             t = time.perf_counter()
@@ -320,22 +368,29 @@ def run_cases_mode(args, base_cmd):
     print(f"[cases] 用例数: {len(cases)}，每个 {args.runs} 次，"
           f"并发 {args.concurrency}，共 {len(cases) * args.runs} 次运行")
     print(f"[cases] 合集: {args.cases}")
+    if args.think_time:
+        print(f"[cases] 思考时间: {args.think_time}ms ±{args.think_jitter}%"
+              f"（指令间，模拟 LLM 生成间隙）")
+    print(f"[cases] 产物目录: {args.out}")
 
     jobs = [(c, i) for c in cases for i in range(args.runs)]
     results = []
     t0 = time.perf_counter()
     with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
         futs = {pool.submit(run_case_once, c, i, base_cmd,
-                            args.timeout, failures_dir): (c, i)
+                            args.timeout, failures_dir,
+                            args.think_time, args.think_jitter): (c, i)
                 for c, i in jobs}
         for fut in as_completed(futs):
             r = fut.result()
             results.append(r)
             tag = ("OK" if r["func_ok"] else
                    ("INSTR-FAIL" if not r["instr_ok"] else "ASSERT-FAIL"))
-            print(f"[cases] {r['case']} run{r['run'] + 1}: "
-                  f"wall={r['wall_ms']:.0f}ms  {tag}"
-                  + (f"  {r['err']}" if tag != "OK" else ""))
+            detail = (f"{r['case']} run{r['run'] + 1}: "
+                      f"wall={r['wall_ms']:.0f}ms  {tag}"
+                      + (f"  {r['err']}" if tag != "OK" else ""))
+            show_progress(f"[cases] {len(results)}/{len(jobs)}",
+                          detail, len(results), len(jobs), t0)
     total_wall = (time.perf_counter() - t0) * 1000
 
     # ---- 汇总 ----
@@ -410,6 +465,8 @@ def run_cases_mode(args, base_cmd):
         "platform": f"{platform.system()} {platform.release()} ({platform.machine()})",
         "runs_per_case": args.runs,
         "concurrency": args.concurrency,
+        "think_time_ms": args.think_time,
+        "think_jitter_pct": args.think_jitter,
         "total_wall_ms": round(total_wall, 1),
         "instr_ok": instr_ok_n,
         "func_ok": func_ok_n,
@@ -431,6 +488,8 @@ def run_cases_mode(args, base_cmd):
         f"- 平台：{report['platform']}",
         f"- 合集：`{args.cases}`（{len(cases)} 个用例，每个 {args.runs} 次，"
         f"并发 {args.concurrency}）",
+        f"- 思考时间：{args.think_time}ms ±{args.think_jitter}%"
+        + ("" if args.think_time else "（关闭）"),
         f"- 结果：指令成功 {instr_ok_n}/{n_total}，功能成功 {func_ok_n}/{n_total}",
         "",
         "## 成功率",
@@ -474,9 +533,8 @@ def run_cases_mode(args, base_cmd):
                 lines.append(f"  - 截图：`{s}`")
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
-    archived = archive_with_timestamp([md_path, json_path], args.out)
-    print(f"\n[cases] 报告: {md_path}\n[cases] 数据: {json_path}"
-          f"\n[cases] 已按时间戳留档: {archived[0]}")
+    print(f"\n[cases] 本次运行目录: {args.out}"
+          f"\n[cases] 报告: {md_path}\n[cases] 数据: {json_path}")
     sys.exit(0 if not fails else 2)
 
 
@@ -491,16 +549,27 @@ def main():
                     help="agent-browser 可执行文件路径（默认从 PATH/npx 查找）")
     ap.add_argument("--timeout", type=float, default=180,
                     help="单条命令超时秒数（默认 180）")
-    ap.add_argument("--out", default=HERE,
-                    help="报告输出目录（默认 bench/）")
+    ap.add_argument("--think-time", type=int, default=0, metavar="MS",
+                    help="指令间思考时间 ms，模拟大模型生成下一条指令的间隙"
+                         "（默认 0=关闭；仅插入 steps 之间，首条前与断言命令不加）")
+    ap.add_argument("--think-jitter", type=int, default=30, metavar="PCT",
+                    help="思考时间随机抖动 ±百分比（默认 30；think-time=0 时忽略）")
+    ap.add_argument("--out", default=None, metavar="DIR",
+                    help="产物目录（默认自动生成 output/bench_c<并发>_n<次数>_<时间戳>，"
+                         "每次运行独立目录，互不覆盖）")
     ap.add_argument("--cases", default=None, metavar="DIR",
                     help="用例合集模式：指定 cases/ 目录，遍历其中 *.json "
-                         "（报告输出 bench/cases-report.md + cases-results.json，"
-                         "失败自动截图到 bench/failures/）")
+                         "（报告/数据/失败截图均在本次运行目录内）")
     args = ap.parse_args()
 
     if args.runs < 1 or args.concurrency < 1:
         sys.exit("错误：runs/concurrency 需 >= 1")
+    if args.think_time < 0:
+        sys.exit("错误：think-time 需 >= 0")
+    if not 0 <= args.think_jitter <= 100:
+        sys.exit("错误：think-jitter 需在 0~100 之间")
+    if not args.out:
+        args.out = default_out_dir(args)
     base_cmd = resolve_bin(args.bin)
 
     if args.cases:
@@ -511,18 +580,26 @@ def main():
     print(f"[bench] runs={args.runs} concurrency={args.concurrency}")
     print(f"[bench] 入口: {page_url}")
     print(f"[bench] 命令: {' '.join(base_cmd)}")
+    if args.think_time:
+        print(f"[bench] 思考时间: {args.think_time}ms ±{args.think_jitter}%"
+              f"（指令间，模拟 LLM 生成间隙）")
+    print(f"[bench] 产物目录: {args.out}")
 
     results = [None] * args.runs
     t0 = time.perf_counter()
     with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
-        futs = {pool.submit(run_once, i, base_cmd, page_url, args.timeout): i
+        futs = {pool.submit(run_once, i, base_cmd, page_url, args.timeout,
+                            args.think_time, args.think_jitter): i
                 for i in range(args.runs)}
         for fut in as_completed(futs):
             r = fut.result()
             results[r["run"]] = r
+            done = sum(1 for x in results if x)
             status = "OK" if r["ok"] else f"FAIL ({r['err']})"
-            print(f"[bench] run {r['run'] + 1}/{args.runs} 完成: "
-                  f"wall={r['wall_ms']:.0f}ms  steps={r['steps_sum_ms']:.0f}ms  {status}")
+            detail = (f"run {r['run'] + 1}: wall={r['wall_ms']:.0f}ms  "
+                      f"steps={r['steps_sum_ms']:.0f}ms  {status}")
+            show_progress(f"[bench] {done}/{args.runs}", detail,
+                          done, args.runs, t0)
     total_wall = (time.perf_counter() - t0) * 1000
 
     ok_runs = [r for r in results if r and r["ok"]]
@@ -561,6 +638,8 @@ def main():
         "platform": f"{platform.system()} {platform.release()} ({platform.machine()})",
         "runs": args.runs,
         "concurrency": args.concurrency,
+        "think_time_ms": args.think_time,
+        "think_jitter_pct": args.think_jitter,
         "total_wall_ms": round(total_wall, 1),
         "ok": len(ok_runs),
         "fail": len(fail_runs),
@@ -582,6 +661,8 @@ def main():
         f"- 入口：{page_url}",
         f"- 命令：`{' '.join(base_cmd)}`",
         f"- 参数：runs={args.runs}, concurrency={args.concurrency}",
+        f"- 思考时间：{args.think_time}ms ±{args.think_jitter}%"
+        + ("" if args.think_time else "（关闭）"),
         f"- 结果：{len(ok_runs)} ok / {len(fail_runs)} fail，整体总耗时 {total_wall:.0f} ms",
         "",
         "## Run 总耗时统计（ms）",
@@ -614,11 +695,10 @@ def main():
                      f"{r['wall_ms']:.0f} | {r['steps_sum_ms']:.0f} |")
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
-    archived = archive_with_timestamp([md_path, json_path], args.out)
 
-    print(f"\n[bench] 报告已写入: {md_path}")
+    print(f"\n[bench] 本次运行目录: {args.out}")
+    print(f"[bench] 报告已写入: {md_path}")
     print(f"[bench] 原始数据已写入: {json_path}")
-    print(f"[bench] 已按时间戳留档: {archived[0]}")
     sys.exit(0 if not fail_runs else 2)
 
 

@@ -1,0 +1,28 @@
+{
+  "name": "mini-shopping-12-reviews-agg",
+  "env": "mini-shopping",
+  "category": "product",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/6s-wireless-headphones-over-ear-noise-canceling-hi-fi-bass-foldable-stereo-wireless-kid-headsets-earbuds-with-built-in-mic-micro-sd-tf-fm-for-iphone-samsung-ipad-pc-black-gold.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["click", "#tab-label-reviews"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "聚合类：懒渲染评论面板后，get 收集全部评论者 + eval 统计评论条数（冻结数据 = 5 条）",
+  "asserts": [
+    {
+      "desc": "5 位评论者全部可见（懒渲染后）",
+      "cmd": ["get", "text", "#reviews"],
+      "op": "contains_all",
+      "expect": ["Joseph Brzezinski", "Catso", "Dibbins", "Anglebert Dinkherhump", "Michelle Davis"]
+    },
+    {
+      "desc": "eval 统计评论条数 = 5",
+      "cmd": ["eval", "document.querySelectorAll('#reviews li.review').length"],
+      "op": "contains",
+      "expect": "5"
+    }
+  ]
+}

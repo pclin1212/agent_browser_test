@@ -1,13 +1,19 @@
-# 运行时产物
+# 运行时产物（统一收纳在 output/：bench 报告/数据/截图/留档 + deploy pid/log）
+output/
 *.pid
 *.log
 __pycache__/
 .DS_Store
+.tools/
 
-# 基准测试报告（bench.py 运行时自动生成）
-bench/bench-report.md
-bench/bench-results.json
-bench/cases-report.md
-bench/cases-results.json
-bench/failures/
-bench/archive/
+# 调试用例 11（agent-browser 输入管线 bug）时的临时登录对照实验页，本地保留、不入库
+html/login-test.html
+sites/mini-shopping/login.html
+sites/mini-shopping/blank.html
+sites/mini-admin/login-test.html
+sites/mini-admin/blank.html
+sites/mini-admin/admin/login-*/
+sites/mini-forum/login-test.html
+sites/mini-forum/login-d1.html
+sites/mini-forum/blank.html
+sites/mini-gitlab/login-test.html

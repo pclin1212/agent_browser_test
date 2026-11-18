@@ -1,0 +1,39 @@
+{
+  "name": "mini-admin-13-eval-dom-stats",
+  "env": "mini-admin",
+  "category": "orders",
+  "base_url": "http://127.0.0.1:8030",
+  "start_url": "{BASE}/admin/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "admin"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/admin/sales/order/"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#mass-action", "hold"]
+  ],
+  "steps_note": "eval 密集（压测分桶）：订单列表页连续 3 条 eval DOM 统计断言（行数/徽标数/checkbox 数均 = 每页 20），外加 1 条 select（未勾选行时切换批量动作是静默无害操作）",
+  "asserts": [
+    {
+      "desc": "eval 统计订单行数 = 20",
+      "cmd": ["eval", "document.querySelectorAll('#orders-table tr.order-row').length"],
+      "op": "contains",
+      "expect": "20"
+    },
+    {
+      "desc": "eval 统计状态徽标数 = 20",
+      "cmd": ["eval", "document.querySelectorAll('#orders-table tr.order-row span.badge').length"],
+      "op": "contains",
+      "expect": "20"
+    },
+    {
+      "desc": "eval 统计批量 checkbox 数 = 20",
+      "cmd": ["eval", "document.querySelectorAll('#orders-table .order-checkbox').length"],
+      "op": "contains",
+      "expect": "20"
+    }
+  ]
+}

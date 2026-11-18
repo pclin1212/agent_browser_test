@@ -48,6 +48,7 @@
 ./deploy/deploy.sh start [port] [site]      # 后台启动（site: mail|shopping|forum|admin|gitlab）
 ./deploy/deploy.sh stop [port] [site]       # 停止后台服务（含端口兜底清理）
 ./deploy/deploy.sh status [port] [site]     # 查看运行状态
+./deploy/deploy_all.sh [start|stop|status|restart]   # 一键批量管理全部五站（默认 start）
 ```
 
 后端是内嵌的调优线程化服务器（不是 `python -m http.server`），专为压测 agent-browser 设计，避免静态服务自身成为瓶颈：
@@ -64,14 +65,17 @@
 
 ## 指令级基准测试（bench/bench.py）
 
-逐条执行 agent-browser 闭环指令，记录每条指令耗时与 run 总耗时，支持并发，汇总 p50/p95/p99/mean/min/max，输出 `bench/bench-report.md` + `bench/bench-results.json`：
+逐条执行 agent-browser 闭环指令，记录每条指令耗时与 run 总耗时，支持并发，汇总 p50/p95/p99/mean/min/max。每次运行自动创建独立产物目录 `output/bench_c<并发>_n<次数>_<时间戳>/`（内含 `bench-report.md` + `bench-results.json`，以及失败时的 `failures/` 截图），不同轮次天然不覆盖：
 
 ```bash
 python3 bench/bench.py                  # 5 次运行，无并发
 python3 bench/bench.py -n 10 -c 2       # 10 次运行，2 路并发
 python3 bench/bench.py --bin /path/to/agent-browser        # 指定二进制（或环境变量 AGENT_BROWSER_BIN）
 python3 bench/bench.py --url http://127.0.0.1:8000/index.html  # 指定入口（默认 file:// 仓库 html/index.html）
+python3 bench/bench.py --think-time 3000                # 指令间插入 3000ms±30% 思考时间（模拟 LLM 生成间隙）
 ```
+
+`--think-time MS`（默认 0=关闭）在每两条指令之间插入随机延迟（`--think-jitter PCT` 控制抖动，默认 ±30%），模拟真实 agent 会话中大模型逐条生成指令的间隙——用于容量/占用类压测（会话资源占用、可持续并发数）；默认关闭保证延迟测量口径不受污染，报告头部会记录 think_time 配置，两种口径的报告不可混比。
 
 说明：
 
@@ -115,7 +119,7 @@ python3 bench/bench.py --url http://127.0.0.1:8000/index.html  # 指定入口（
 
 ```bash
 python3 bench/bench.py --cases cases -n 3 -c 2   # 合集内所有用例，每个 3 次，2 路并发
-# 报告：bench/cases-report.md + bench/cases-results.json
+# 报告：output/bench_c<并发>_n<次数>_<时间戳>/cases-report.md + cases-results.json
 # 前置：把五个站点全部启动（mail 8000 / shopping 8010 / forum 8020 / admin 8030 / gitlab 8040）
 ```
 
@@ -163,6 +167,14 @@ agent-browser get text "#filtered-result"
 ### 5. 元素遮挡：click 的 actionability 检查
 
 `click` 会做遮挡检查：若目标元素的点击坐标被其他元素覆盖（实测：mini-forum 标签下拉面板展开后盖住 `#submit-btn`），指令直接失败并报 `Element ... is covered by <...>`。站点侧在选中选项后应关闭面板（本仓已改为选中即 `classList.remove("open")`）；用例侧则必须保证点击路径上没有浮层。
+
+### 6. 输入管线死亡：fill 特定字符串 + 导航后会话级 click/press 静默失效（agent-browser 0.41.2 实测）
+
+**现象**：fill 邮箱/人名点分格式字符串（实测 `emma.lopez@gmail.com`、`emma.lopez` 稳定致死；`admin`、`xyz.lopez`、`a.b`、`a@b`、`emma@gmail` 均安全）到表单字段后，页面发生导航（表单提交跳转、`location.href`、eval 触发的 JS click 均可），此后**该会话所有 click/press 静默失效**：rc==0 但零事件派发（capture 监听探针实测）。fill/type/eval/get/screenshot 不受影响。死亡是会话级的（daemon + Chrome 生命周期内不可恢复）。
+
+**已排除**（对照实验矩阵，2026-11 深度调试）：与站点/服务进程/端口/页面骨架/资源/跳转目标/提交方式（agent-browser click vs eval JS click vs type 逐键）/`autocomplete="off"`/Chrome `--disable-features=Autofill,PasswordLeakDetection,PasswordManager`（已确认 flag 传到了 chrome 进程仍无效）均无关；只与 fill 进字段的**值**有关，疑似 Chrome 对人名点分格式的内部启发式与 headless 输入管线冲突。
+
+**规避**：需要"登录后继续 click"的用例，登录改用 `eval` 直写 token（如 `localStorage.setItem('ms_token', '...')`），登录表单交互由断言不依赖后续 click 的用例单独覆盖（如 `mini-shopping-01-login`：fill+click 提交后仅用 `eval location.href` / `get text` 断言）。见 `cases/mini-shopping-11-account-edit.json` 的 steps_note。
 
 ## mini-shopping 站（sites/mini-shopping/）
 

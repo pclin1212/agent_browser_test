@@ -56,7 +56,7 @@ var MG = {
       ? "<span class='header-user'>" + MG.esc(u.name) + "</span><a href='#' id='header-signout'>Sign out</a>"
       : "<a href='/users/sign_in/'>Sign in</a>";
     h.innerHTML = "<a class='logo' href='/'>telemetry-dashboard</a>" +
-      "<nav class='site-nav'><a href='/tree.html'>Code</a><a href='/issues/'>Issues</a></nav>" +
+      "<nav class='site-nav'><a href='/tree.html'>Code</a><a href='/issues/'>Issues</a><a href='/settings.html'>Settings</a></nav>" +
       "<div class='header-right'>" + right + "</div>";
     var so = document.getElementById("header-signout");
     if (so) so.addEventListener("click", function () {

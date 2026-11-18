@@ -1,0 +1,35 @@
+{
+  "name": "mini-forum-12-settings-profile",
+  "env": "mini-forum",
+  "category": "settings",
+  "base_url": "http://127.0.0.1:8020",
+  "start_url": "{BASE}/login.html",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/settings.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#display-name", "alice_chen"],
+    ["fill", "#bio", "Frontend engineer, interested in browser automation."],
+    ["click", "#save-profile"]
+  ],
+  "steps_note": "配置操作类（WebArena 缺口）：个人资料页 fill 输入框 + fill textarea + click 保存",
+  "asserts": [
+    {
+      "desc": "保存成功提示包含昵称与简介",
+      "cmd": ["get", "text", "#profile-saved"],
+      "op": "contains_all",
+      "expect": ["Profile saved", "alice_chen", "browser automation"]
+    },
+    {
+      "desc": "display-name 输入框当前值",
+      "cmd": ["eval", "document.querySelector('#display-name').value"],
+      "op": "contains",
+      "expect": "alice_chen"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - magento admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb"><a href="/">Admin</a> / <strong>Settings</strong></nav>
+  <div class="form">
+    <h1>Store Settings</h1>
+    <form id="settings-form">
+      <label for="store-name">Store Name</label>
+      <input id="store-name" name="store-name" type="text" value="One Stop Market">
+      <label for="timezone">Timezone</label>
+      <select id="timezone" name="timezone">
+        <option value="UTC">UTC</option>
+        <option value="America/New_York">America/New_York</option>
+        <option value="Asia/Shanghai">Asia/Shanghai</option>
+      </select>
+      <label for="order-auto-assign">Order Auto-Assign</label>
+      <select id="order-auto-assign" name="order-auto-assign">
+        <option value="off">off</option>
+        <option value="manual">manual</option>
+        <option value="auto">auto</option>
+      </select>
+      <button class="btn-primary" id="save-settings" type="button">Save Settings</button>
+      <div class="msg" id="settings-saved"></div>
+    </form>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MA.requireAuth()) {
+    MA.renderHeader();
+    (function () {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem("ma_settings") || "{}"); } catch (e) {}
+      if (saved.storeName) document.getElementById("store-name").value = saved.storeName;
+      if (saved.timezone) document.getElementById("timezone").value = saved.timezone;
+      if (saved.autoAssign) document.getElementById("order-auto-assign").value = saved.autoAssign;
+      document.getElementById("save-settings").addEventListener("click", function () {
+        var s = {
+          storeName: document.getElementById("store-name").value,
+          timezone: document.getElementById("timezone").value,
+          autoAssign: document.getElementById("order-auto-assign").value
+        };
+        localStorage.setItem("ma_settings", JSON.stringify(s));
+        document.getElementById("settings-saved").textContent =
+          "Settings saved: " + s.storeName + " / " + s.timezone + " / auto-assign " + s.autoAssign;
+      });
+    })();
+  }
+</script>
+</body>
+</html>

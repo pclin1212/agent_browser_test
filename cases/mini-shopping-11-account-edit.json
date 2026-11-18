@@ -1,0 +1,33 @@
+{
+  "name": "mini-shopping-11-account-edit",
+  "env": "mini-shopping",
+  "category": "settings",
+  "base_url": "http://127.0.0.1:8010",
+  "start_url": "{BASE}/customer/account/login/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["eval", "localStorage.setItem('ms_token', 'emma.lopez@gmail.com')"],
+    ["open", "{BASE}/customer/account/edit/"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#firstname", "Emmeline"],
+    ["fill", "#lastname", "Lopez-Johnson"],
+    ["click", "#newsletter"],
+    ["click", "#save-account"]
+  ],
+  "steps_note": "配置操作类（WebArena 缺口）：账户编辑页 fill 姓名 + click 切换 checkbox（默认勾选→取消）+ click 保存。注意：登录用 eval 直写 token 而非表单提交——实测 agent-browser 0.41.2 中 fill 邮箱格式用户名后提交导航会让会话级输入（click/press）静默失效（rc=0 但零事件派发），登录表单交互由 mini-shopping-01-login 覆盖（其断言不依赖后续 click，不受影响）",
+  "asserts": [
+    {
+      "desc": "保存成功提示包含新姓名与未订阅状态",
+      "cmd": ["get", "text", "#account-saved"],
+      "op": "contains_all",
+      "expect": ["Account information saved", "Emmeline", "Lopez-Johnson", "not subscribed"]
+    },
+    {
+      "desc": "newsletter checkbox 已被取消勾选",
+      "cmd": ["eval", "document.querySelector('#newsletter').checked ? 'subscribed' : 'not-subscribed'"],
+      "op": "contains",
+      "expect": "not-subscribed"
+    }
+  ]
+}

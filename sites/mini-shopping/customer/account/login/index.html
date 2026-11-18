@@ -15,12 +15,12 @@
   <nav class="breadcrumb"><a href="../../../../">Home</a> / Customer Login</nav>
   <div class="form">
     <h1>Login</h1>
-    <form id="login-form" onsubmit="return false">
+    <form id="login-form">
       <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="username">
+      <input id="email" name="email" type="text" autocomplete="username">
       <label for="pass">Password</label>
-      <input id="pass" type="password" autocomplete="current-password">
-      <button class="submit" id="send2" type="button">Login</button>
+      <input id="pass" name="pass" type="password" autocomplete="current-password">
+      <button class="submit" id="send2" type="submit">Login</button>
       <div class="err" id="login-err"></div>
     </form>
   </div>
@@ -29,7 +29,8 @@
 <script src="../../../app.js"></script>
 <script>
   var err = document.getElementById("login-err");
-  document.getElementById("send2").addEventListener("click", function () {
+  document.getElementById("login-form").addEventListener("submit", function (e) {
+    e.preventDefault();
     var u = MS.login(document.getElementById("email").value.trim(),
                      document.getElementById("pass").value);
     if (u) { window.location.href = "../"; }

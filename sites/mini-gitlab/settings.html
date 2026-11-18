@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - telemetry-dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site" id="site-header"></header>
+<main>
+  <nav class="breadcrumb"><a href="/">Project</a> / <strong>Settings</strong></nav>
+  <div class="form">
+    <h1>Project Settings</h1>
+    <form id="project-settings-form">
+      <label for="default-branch">Default Branch</label>
+      <select id="default-branch" name="default-branch">
+        <option value="main">main</option>
+        <option value="dev">dev</option>
+        <option value="release">release</option>
+      </select>
+      <label for="visibility">Visibility</label>
+      <select id="visibility" name="visibility">
+        <option value="private">private</option>
+        <option value="internal">internal</option>
+        <option value="public">public</option>
+      </select>
+      <button class="btn-submit" id="save-project" type="button">Save Changes</button>
+      <div class="msg" id="project-saved"></div>
+    </form>
+  </div>
+</main>
+<script src="/data.js"></script>
+<script src="/app.js"></script>
+<script>
+  if (MG.requireAuth()) {
+    MG.renderHeader();
+    (function () {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem("mg_settings") || "{}"); } catch (e) {}
+      if (saved.defaultBranch) document.getElementById("default-branch").value = saved.defaultBranch;
+      if (saved.visibility) document.getElementById("visibility").value = saved.visibility;
+      document.getElementById("save-project").addEventListener("click", function () {
+        var s = {
+          defaultBranch: document.getElementById("default-branch").value,
+          visibility: document.getElementById("visibility").value
+        };
+        localStorage.setItem("mg_settings", JSON.stringify(s));
+        document.getElementById("project-saved").textContent =
+          "Project settings saved: default branch " + s.defaultBranch + ", visibility " + s.visibility;
+      });
+    })();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "name": "cross-02-gitlab-issues-to-forum-post",
+  "env": "cross",
+  "category": "cross-site",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/issues/"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#state-filter", "all"],
+    ["wait", "--load", "networkidle"],
+    ["eval", "document.querySelectorAll('#issues-table tr.issue-row').length"],
+    ["open", "http://127.0.0.1:8020/login.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "alice"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "http://127.0.0.1:8020/compose.html"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#post-title", "telemetry-dashboard issue tracker now has 10 issues in total"],
+    ["fill", "#editor", "Counted all 10 issues (6 opened + 4 closed) on the telemetry-dashboard issue tracker."],
+    ["click", "#tag-dropdown-toggle"],
+    ["click", ".tag-option[data-value='tech']"],
+    ["click", "#submit-btn"],
+    ["wait", "--load", "networkidle"]
+  ],
+  "steps_note": "跨站任务（WebArena 缺口）：mini-gitlab 切 select 到 all 后 eval 统计 issue 总数 10（冻结数据 6 opened + 4 closed），再把统计结果带到 mini-forum 发帖",
+  "asserts": [
+    {
+      "desc": "论坛新帖创建成功且含跨站带来的统计数",
+      "cmd": ["get", "text", "body"],
+      "op": "contains_all",
+      "expect": ["telemetry-dashboard issue tracker now has 10 issues", "Topic #9", "10 issues"]
+    }
+  ]
+}

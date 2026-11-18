@@ -1,0 +1,35 @@
+{
+  "name": "mini-gitlab-11-settings-project",
+  "env": "mini-gitlab",
+  "category": "settings",
+  "base_url": "http://127.0.0.1:8040",
+  "start_url": "{BASE}/users/sign_in/",
+  "steps": [
+    ["open", "{start_url}"],
+    ["wait", "--load", "networkidle"],
+    ["fill", "#username", "root"],
+    ["fill", "#password", "Password.123"],
+    ["click", "#login-btn"],
+    ["wait", "--load", "networkidle"],
+    ["open", "{BASE}/settings.html"],
+    ["wait", "--load", "networkidle"],
+    ["select", "#default-branch", "release"],
+    ["select", "#visibility", "internal"],
+    ["click", "#save-project"]
+  ],
+  "steps_note": "配置操作类（WebArena 缺口）：项目设置页双原生 select + click 保存",
+  "asserts": [
+    {
+      "desc": "保存成功提示包含默认分支与可见性",
+      "cmd": ["get", "text", "#project-saved"],
+      "op": "contains_all",
+      "expect": ["Project settings saved", "release", "internal"]
+    },
+    {
+      "desc": "default-branch select 当前值为 release",
+      "cmd": ["eval", "document.querySelector('#default-branch').value"],
+      "op": "contains",
+      "expect": "release"
+    }
+  ]
+}
